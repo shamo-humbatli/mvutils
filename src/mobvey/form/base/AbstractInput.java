@@ -3,6 +3,7 @@ package mobvey.form.base;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import mobvey.form.answer.content.container.ContentContainer;
 import mobvey.form.enums.InputTypes;
 import mobvey.form.enums.InputValueTypes;
 
@@ -10,7 +11,7 @@ import mobvey.form.enums.InputValueTypes;
  *
  * @author Shamo Humbatli
  */
-public class AbstractInput implements Serializable{
+public class AbstractInput implements Serializable {
 
     private String id = null;
     private int contentColumnIndex;
@@ -20,9 +21,12 @@ public class AbstractInput implements Serializable{
     private final InputTypes inputType;
     private Object displayContent;
     private String parentId = null;
+    private boolean complex = false;
 
     private List<String> questionsToEnable;
     private List<String> questionsToDisable;
+    
+    private List<ContentContainer> contentContainers;
 
     private String returnContent = null;
 
@@ -33,8 +37,15 @@ public class AbstractInput implements Serializable{
     public void setId(String id) {
         this.id = id;
     }
+    public boolean isComplex() {
+        return complex;
+    }
+
+    public void setComplex(boolean complex) {
+        this.complex = complex;
+    }
     
-     public String getParentId() {
+    public String getParentId() {
         return parentId;
     }
 
@@ -106,6 +117,22 @@ public class AbstractInput implements Serializable{
         questionsToEnable.add(questionId);
     }
 
+    public List<String> getQuestionsToEnable() {
+        return questionsToEnable;
+    }
+
+    public void setQuestionsToEnable(List<String> questionsToEnable) {
+        this.questionsToEnable = questionsToEnable;
+    }
+
+    public List<String> getQuestionsToDisable() {
+        return questionsToDisable;
+    }
+
+    public void setQuestionsToDisable(List<String> questionsToDisable) {
+        this.questionsToDisable = questionsToDisable;
+    }
+
     public void AddQuestionToDisable(String questionId) {
         if (questionsToDisable == null) {
             questionsToDisable = new ArrayList<>();
@@ -116,6 +143,22 @@ public class AbstractInput implements Serializable{
 
     public boolean HasOperation() {
         return operation != null;
+    }
+    
+     public List<ContentContainer> getContentContainers() {
+        return contentContainers;
+    }
+
+    public void setContentContainers(List<ContentContainer> contentContainers) {
+        this.contentContainers = contentContainers;
+    }
+    
+    public void AddContentContainer(ContentContainer contentContainer)
+    {
+        if(contentContainers == null)
+            contentContainers = new ArrayList<>();
+        
+        contentContainers.add(contentContainer);
     }
 
     @Override

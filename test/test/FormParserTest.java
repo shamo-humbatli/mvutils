@@ -8,6 +8,7 @@ import mobvey.form.answer.content.InputOptionContent;
 import mobvey.form.answer.content.InputTextContent;
 import mobvey.form.answer.content.container.ContentContainer;
 import mobvey.form.base.AbstractAnswer;
+import mobvey.form.base.AbstractInput;
 import mobvey.form.question.Question;
 import mobvey.parser.FormParser;
 
@@ -19,7 +20,20 @@ public class FormParserTest {
 
     public static void main(String[] args) throws ParserConfigurationException {
 
-        FormParser fp = new FormParser(new File("C:\\Test"));
+//        if(args == null || args.length == 0)
+//        {
+//            System.out.println("Please give working directory path");
+//            return;
+//        }
+//        
+//        String filePath = args[0];
+        String filePath = "C:\\Test";
+
+        if (filePath == null) {
+            return;
+        }
+
+        FormParser fp = new FormParser(new File(filePath));
         QuestionForm qf = fp.ParseXml("questions.xml");
 
         System.out.println("Form info: " + qf.toString());
@@ -36,22 +50,38 @@ public class FormParserTest {
                 System.out.println("Answer info: " + a.toString());
 
                 for (ContentContainer cc : a.getAnswerContentContainers()) {
-                    System.out.println("Container info: " + a.toString());
-
-                    for (Object ai : cc.getContentInputs()) {
-
-                        if (ai instanceof InputOptionContent) {
-                            InputOptionContent ioc = (InputOptionContent) ai;
-                            System.out.println("Input option info: " + ioc.toString());
-                        } else if (ai instanceof InputTextContent) {
-                            InputTextContent itc = (InputTextContent) ai;
-                            System.out.println("Input text info: " + itc.toString());
-                        }
-                    }
-
+                    ContentContainerDetails(cc);
                 }
             }
+
+            System.out.println("\n============================================================\n");
         }
 
+    }
+
+    private static void ContentContainerDetails(ContentContainer cc) {
+        System.out.println("Container info: " + cc.toString());
+
+        for (AbstractInput ai : cc.getContentInputs()) {
+            InputDetails(ai);
+        }
+    }
+
+    private static void InputDetails(AbstractInput ai) {
+        if (ai instanceof InputOptionContent) {
+            InputOptionContent ioc = (InputOptionContent) ai;
+            System.out.println("Input option info: " + ioc.toString());
+        } else if (ai instanceof InputTextContent) {
+            InputTextContent itc = (InputTextContent) ai;
+            System.out.println("Input text info: " + itc.toString());
+        }
+
+        if (ai.isComplex()) {
+            System.out.println("============children-begin=============");
+            for (ContentContainer subCC : ai.getContentContainers()) {
+                ContentContainerDetails(subCC);
+            }
+            System.out.println("============children-end=============");
+        }
     }
 }

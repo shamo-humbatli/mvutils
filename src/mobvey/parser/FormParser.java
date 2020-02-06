@@ -105,10 +105,11 @@ public class FormParser {
 
                 for (int questionIndex = 0; questionIndex < questions.getLength(); questionIndex++) {
                     Node questionNode = questions.item(questionIndex);
-                    
-                    if(questionNode == null || !questionNode.getNodeName().equals("question"))
+
+                    if (questionNode == null || !questionNode.getNodeName().equals("question")) {
                         continue;
-                    
+                    }
+
                     NodeList questionNodeList = questionNode.getChildNodes();
 
                     String questionId = GetAttribute(questionNode, "id");
@@ -140,20 +141,6 @@ public class FormParser {
 
         } catch (Exception exp) {
             logger.log(Level.SEVERE, exp.toString());
-        }
-        return null;
-    }
-
-    public String GetAttribute(Node node, String attrName) {
-
-        if (!node.hasAttributes()) {
-            return null;
-        }
-
-        for (int attrIndx = 0; attrIndx < node.getAttributes().getLength(); attrIndx++) {
-            if (node.getAttributes().item(attrIndx).getNodeName().equals(attrName)) {
-                return node.getAttributes().getNamedItem(attrName).getNodeValue();
-            }
         }
         return null;
     }
@@ -210,6 +197,7 @@ public class FormParser {
         String resultType = GetAttribute(contentContinerNode, "resultType");
         String displayText = GetAttribute(contentContinerNode, "displayText");
         String source = GetAttribute(contentContinerNode, "source");
+        String returnContentCommon = GetAttribute(contentContinerNode, "return");
 
         ContentContainer container = new ContentContainer(DisplayTypes.BLOCK);
         container.setDisplayText(displayText);
@@ -245,6 +233,15 @@ public class FormParser {
             }
 
             AbstractInput input = BuildInput(inputNode);
+
+            if (input == null) {
+                continue;
+            }
+
+            if (input.getReturnContent() == null) {
+                input.setReturnContent(returnContentCommon);
+            }
+
             container.AddContentInput(input);
         }
 
@@ -265,10 +262,11 @@ public class FormParser {
 
             String enabledQuestions = GetAttribute(inputElement, "enableQuestion");
             String disabledQuestions = GetAttribute(inputElement, "disableQuestion");
-
-            String displayContent = inputElement.getTextContent();
+            String isComplexString = GetAttribute(inputElement, "isComplex");
 
             InputValueTypes inputValueType = InputValueTypes.TEXT;
+
+            boolean isComplex = false;
 
             if (valueTypeString != null) {
                 switch (valueTypeString) {
@@ -286,13 +284,16 @@ public class FormParser {
 
             AbstractInput abstractAnswerContent = null;
 
-            if(columnIndex == null)
-            {
+            if (columnIndex == null) {
                 columnIndex = "0";
             }
-            
+
             if (itemIndex == null) {
                 itemIndex = columnIndex;
+            }
+
+            if (isComplexString != null) {
+                isComplex = Boolean.valueOf(isComplexString);
             }
 
             switch (contentType) {
@@ -306,8 +307,15 @@ public class FormParser {
                 case "text": {
                     InputTextContent textContent = new InputTextContent();
                     String placeHolder = GetAttribute(inputElement, "placeHolder");
+                    String readonlyString = GetAttribute(inputElement, "readonly");
 
                     textContent.setPlaceHolder(placeHolder);
+                    textContent.setReadonly(false);
+
+                    if (readonlyString != null) {
+                        textContent.setReadonly(Boolean.valueOf(readonlyString));
+                    }
+
                     abstractAnswerContent = textContent;
                     break;
                 }
@@ -321,8 +329,31 @@ public class FormParser {
             abstractAnswerContent.setOperation(contentOperation);
             abstractAnswerContent.setInputValueType(inputValueType);
 
-            try
-            {
+            String displayContent = inputElement.getTextContent();
+
+            if (isComplex) {
+                abstractAnswerContent.setComplex(isComplex);
+                NodeList children = inputElement.getChildNodes();
+
+                if (children != null) {
+                    for (int childIndex = 0; childIndex < children.getLength(); childIndex++) {
+                        Node child = children.item(childIndex);
+
+                        if (child.getNodeName().equals("inputText")) {
+                            displayContent = child.getTextContent();
+                        } else if (child.getNodeName().equals("contentContainer")) {
+                            ContentContainer childCC = BuildContentContainer(child);
+
+                            if (childCC == null) {
+                                continue;
+                            }
+
+                            abstractAnswerContent.AddContentContainer(childCC);
+                        }
+                    }
+                }
+            }
+
             switch (inputValueType) {
                 case TEXT: {
                     abstractAnswerContent.setDisplayContent(displayContent);
@@ -337,20 +368,28 @@ public class FormParser {
                     break;
                 }
             }
-            }
-            catch(Exception exp)
-            {
-                logger.log(Level.SEVERE, exp.toString());
-            }
 
             if (enabledQuestions != null) {
                 for (String eq : enabledQuestions.split(",")) {
+
+                    eq = eq.trim();
+
+                    if ("".equals(eq)) {
+                        continue;
+                    }
+
                     abstractAnswerContent.AddQuestionToEnable(eq);
                 }
             }
 
             if (disabledQuestions != null) {
                 for (String dq : disabledQuestions.split(",")) {
+                    dq = dq.trim();
+
+                    if ("".equals(dq)) {
+                        continue;
+                    }
+
                     abstractAnswerContent.AddQuestionToDisable(dq);
                 }
             }
@@ -371,6 +410,7 @@ public class FormParser {
             String selectExp = GetAttribute(containerNode, "displayExpression");
             String returnExpression = GetAttribute(containerNode, "returnExpression");
             String columnIndexString = GetAttribute(containerNode, "columnIndex");
+            String returnContentCommon = GetAttribute(containerNode, "return");
 
             int columnIndex = 0;
 
@@ -387,6 +427,10 @@ public class FormParser {
             for (int nodeIndx = 0; nodeIndx < displayContents.getLength(); nodeIndx++) {
 
                 String returnContent = returnContents.item(nodeIndx).getTextContent();
+                if (returnContent == null) {
+                    returnContent = returnContentCommon;
+                }
+
                 String ph = displayContents.item(nodeIndx).getTextContent();
 
                 InputOptionContent ioc = new InputOptionContent();
@@ -406,6 +450,26 @@ public class FormParser {
         return null;
     }
 
+    public String GetAttribute(Node node, String attrName) {
+
+        if (!node.hasAttributes()) {
+            return null;
+        }
+
+        for (int attrIndx = 0; attrIndx < node.getAttributes().getLength(); attrIndx++) {
+            if (node.getAttributes().item(attrIndx).getNodeName().equals(attrName)) {
+                String attr = node.getAttributes().getNamedItem(attrName).getNodeValue().trim();
+
+                if ("".equals(attr)) {
+                    return null;
+                }
+
+                return attr;
+            }
+        }
+        return null;
+    }
+
     public Object EvaluateXPathExpression(Document domDocument, String expression) throws XPathExpressionException {
 
         xpath = xpathFactory.newXPath();
@@ -414,5 +478,4 @@ public class FormParser {
 
         return result;
     }
-
 }
