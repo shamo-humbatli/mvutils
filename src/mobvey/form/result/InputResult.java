@@ -1,10 +1,12 @@
 package mobvey.form.result;
 
+import java.io.Serializable;
+
 /**
  *
  * @author Shamo Humbatli
  */
-public class InputResult {
+public class InputResult implements Serializable {
     private String id;
     private int columnIndex = 0;
     private String returnValue;

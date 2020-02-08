@@ -1,5 +1,6 @@
 package mobvey.form.result;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -7,7 +8,7 @@ import java.util.List;
  *
  * @author Shamo Humbatli
  */
-public class QuestionResult {
+public class QuestionResult implements Serializable {
     private String id;
     private List<InputResult> inputResults = new ArrayList<>();
 
