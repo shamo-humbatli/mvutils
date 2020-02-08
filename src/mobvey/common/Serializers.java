@@ -53,7 +53,7 @@ public class Serializers {
         return result;
     }
 
-    public void SerializeObjectToFile(Object object, String fileName) {
+    public <T extends Serializable> void SerializeObjectToFile(T object, String fileName) {
         try {
             String rootPath = GetRootPath();
             try (FileOutputStream fileOut = new FileOutputStream(Paths.get(rootPath, fileName).toFile()); ObjectOutputStream out = new ObjectOutputStream(fileOut)) {
