@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.xml.parsers.DocumentBuilder;
@@ -199,6 +200,10 @@ public class FormParser {
         String source = GetAttribute(contentContinerNode, "source");
         String returnContentCommon = GetAttribute(contentContinerNode, "return");
 
+        if (id == null) {
+            id = UUID.randomUUID().toString();
+        }
+
         ContentContainer container = new ContentContainer(DisplayTypes.BLOCK);
         container.setDisplayText(displayText);
         container.setResultType(ResultTypes.SINGLE);
@@ -265,6 +270,10 @@ public class FormParser {
             String isComplexString = GetAttribute(inputElement, "isComplex");
 
             InputValueTypes inputValueType = InputValueTypes.TEXT;
+
+            if (inputId == null) {
+                inputId = UUID.randomUUID().toString();
+            }
 
             boolean isComplex = false;
 
@@ -439,7 +448,7 @@ public class FormParser {
                 ioc.setContentItemIndex(String.valueOf(nodeIndx + 1));
                 ioc.setReturnContent(returnContent);
                 ioc.setDisplayContent(ph);
-
+                ioc.setId(UUID.randomUUID().toString());
                 options.add(ioc);
             }
 
