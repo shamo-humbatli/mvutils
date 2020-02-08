@@ -12,7 +12,7 @@ import mobvey.form.enums.ResultTypes;
  *
  * @author Shamo Humbatli
  */
-public class ContentContainer implements Serializable{
+public class ContentContainer implements Serializable {
 
     private String id = null;
     private String displayText = null;
@@ -27,13 +27,15 @@ public class ContentContainer implements Serializable{
     public ContentContainer(DisplayTypes displayType) {
         this.displayType = displayType;
     }
-public String getId() {
+
+    public String getId() {
         return id;
     }
 
     public void setId(String id) {
         this.id = id;
     }
+
     public String getDisplayText() {
         return displayText;
     }
@@ -65,8 +67,8 @@ public String getId() {
     public void AddContentInput(AbstractInput abstractInput) {
         this.contentInputs.add(abstractInput);
     }
-    
-     public void AddContentInputsRange(Collection<? extends AbstractInput> abstractInput) {
+
+    public void AddContentInputsRange(Collection<? extends AbstractInput> abstractInput) {
         this.contentInputs.addAll(abstractInput);
     }
 

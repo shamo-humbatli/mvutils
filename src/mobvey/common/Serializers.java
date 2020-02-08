@@ -15,7 +15,7 @@ import java.util.logging.Logger;
  *
  * @author Shamo Humbatli
  */
-public final class Serializers {
+public class Serializers {
 
     private static final Logger logger = Logger.getLogger(Serializers.class.getName());
 
