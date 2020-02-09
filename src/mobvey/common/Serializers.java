@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
-import java.nio.file.Paths;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -43,7 +42,7 @@ public class Serializers {
         String rootPath = GetRootPath();
 
         try {
-            try (FileInputStream fileIn = new FileInputStream(Paths.get(rootPath, fileName).toFile());
+            try (FileInputStream fileIn = new FileInputStream(new File(rootPath, fileName));
                     ObjectInputStream in = new ObjectInputStream(fileIn)) {
                 result = objectType.cast(in.readObject());
             }
@@ -56,7 +55,7 @@ public class Serializers {
     public <T extends Serializable> void SerializeObjectToFile(T object, String fileName) {
         try {
             String rootPath = GetRootPath();
-            try (FileOutputStream fileOut = new FileOutputStream(Paths.get(rootPath, fileName).toFile()); ObjectOutputStream out = new ObjectOutputStream(fileOut)) {
+            try (FileOutputStream fileOut = new FileOutputStream(new File(rootPath, fileName)); ObjectOutputStream out = new ObjectOutputStream(fileOut)) {
                 out.writeObject(object);
             }
         } catch (IOException exp) {
