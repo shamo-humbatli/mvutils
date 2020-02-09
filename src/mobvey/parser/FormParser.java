@@ -200,6 +200,9 @@ public class FormParser {
         String source = GetAttribute(contentContinerNode, "source");
         String returnContentCommon = GetAttribute(contentContinerNode, "return");
 
+        String defaultQuestionsToEnable = GetAttribute(contentContinerNode, "enableQuestion");
+        String defaultQuestionsToDisable = GetAttribute(contentContinerNode, "disableQuestion");
+
         if (id == null) {
             id = UUID.randomUUID().toString();
         }
@@ -245,6 +248,32 @@ public class FormParser {
 
             if (input.getReturnContent() == null) {
                 input.setReturnContent(returnContentCommon);
+            }
+
+            if (defaultQuestionsToEnable != null && input.getQuestionsToEnable() == null) {
+
+                for (String eq : defaultQuestionsToEnable.split(",")) {
+                    eq = eq.trim();
+
+                    if ("".equals(eq)) {
+                        continue;
+                    }
+
+                    input.AddQuestionToEnable(eq);
+                }
+            }
+
+            if (defaultQuestionsToDisable != null && input.getQuestionsToDisable() == null) {
+
+                for (String dq : defaultQuestionsToDisable.split(",")) {
+                    dq = dq.trim();
+
+                    if ("".equals(dq)) {
+                        continue;
+                    }
+
+                    input.AddQuestionToDisable(dq);
+                }
             }
 
             container.AddContentInput(input);
@@ -379,27 +408,37 @@ public class FormParser {
             }
 
             if (enabledQuestions != null) {
-                for (String eq : enabledQuestions.split(",")) {
 
-                    eq = eq.trim();
+                if (enabledQuestions.equals("skip")) {
+                    abstractAnswerContent.AddQuestionToEnable("");
+                } else {
+                    for (String eq : enabledQuestions.split(",")) {
 
-                    if ("".equals(eq)) {
-                        continue;
+                        eq = eq.trim();
+
+                        if ("".equals(eq)) {
+                            continue;
+                        }
+
+                        abstractAnswerContent.AddQuestionToEnable(eq);
                     }
-
-                    abstractAnswerContent.AddQuestionToEnable(eq);
                 }
             }
 
             if (disabledQuestions != null) {
-                for (String dq : disabledQuestions.split(",")) {
-                    dq = dq.trim();
 
-                    if ("".equals(dq)) {
-                        continue;
+                if (disabledQuestions.equals("skip")) {
+                    abstractAnswerContent.AddQuestionToDisable("");
+                } else {
+                    for (String dq : disabledQuestions.split(",")) {
+                        dq = dq.trim();
+
+                        if ("".equals(dq)) {
+                            continue;
+                        }
+
+                        abstractAnswerContent.AddQuestionToDisable(dq);
                     }
-
-                    abstractAnswerContent.AddQuestionToDisable(dq);
                 }
             }
 

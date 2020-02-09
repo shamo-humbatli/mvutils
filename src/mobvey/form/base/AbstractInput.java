@@ -25,7 +25,7 @@ public class AbstractInput implements Serializable {
 
     private List<String> questionsToEnable;
     private List<String> questionsToDisable;
-    
+
     private List<ContentContainer> contentContainers;
 
     private String returnContent = null;
@@ -37,6 +37,7 @@ public class AbstractInput implements Serializable {
     public void setId(String id) {
         this.id = id;
     }
+
     public boolean isComplex() {
         return complex;
     }
@@ -44,7 +45,7 @@ public class AbstractInput implements Serializable {
     public void setComplex(boolean complex) {
         this.complex = complex;
     }
-    
+
     public String getParentId() {
         return parentId;
     }
@@ -114,6 +115,10 @@ public class AbstractInput implements Serializable {
             questionsToEnable = new ArrayList<>();
         }
 
+        if ("".equals(questionId)) {
+            return;
+        }
+
         questionsToEnable.add(questionId);
     }
 
@@ -137,27 +142,31 @@ public class AbstractInput implements Serializable {
         if (questionsToDisable == null) {
             questionsToDisable = new ArrayList<>();
         }
-
+        
+        if ("".equals(questionId)) {
+            return;
+        }
+        
         questionsToDisable.add(questionId);
     }
 
     public boolean HasOperation() {
         return operation != null;
     }
-    
-     public List<ContentContainer> getContentContainers() {
+
+    public List<ContentContainer> getContentContainers() {
         return contentContainers;
     }
 
     public void setContentContainers(List<ContentContainer> contentContainers) {
         this.contentContainers = contentContainers;
     }
-    
-    public void AddContentContainer(ContentContainer contentContainer)
-    {
-        if(contentContainers == null)
+
+    public void AddContentContainer(ContentContainer contentContainer) {
+        if (contentContainers == null) {
             contentContainers = new ArrayList<>();
-        
+        }
+
         contentContainers.add(contentContainer);
     }
 
