@@ -14,7 +14,8 @@ import mobvey.form.enums.InputValueTypes;
 public class AbstractInput implements Serializable {
 
     private String id = null;
-    private int contentColumnIndex;
+    private int contentColumnIndex = 0;
+    private boolean columnIndexDeclaredByDefault = true;
     private String contentItemIndex;
     private InputValueTypes inputValueType;
     private String operation;
@@ -60,6 +61,14 @@ public class AbstractInput implements Serializable {
 
     public void setDisplayContent(Object displayContent) {
         this.displayContent = displayContent;
+    }
+
+    public boolean isColumnIndexDeclaredByDefault() {
+        return columnIndexDeclaredByDefault;
+    }
+
+    public void setColumnIndexDeclaredByDefault(boolean columnIndexDeclaredByDefault) {
+        this.columnIndexDeclaredByDefault = columnIndexDeclaredByDefault;
     }
 
     public AbstractInput(InputTypes inputType) {

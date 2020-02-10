@@ -199,6 +199,7 @@ public class FormParser {
         String displayText = GetAttribute(contentContinerNode, "displayText");
         String source = GetAttribute(contentContinerNode, "source");
         String returnContentCommon = GetAttribute(contentContinerNode, "return");
+        String columnIndexString = GetAttribute(contentContinerNode, "columnIndex");
 
         String defaultQuestionsToEnable = GetAttribute(contentContinerNode, "enableQuestion");
         String defaultQuestionsToDisable = GetAttribute(contentContinerNode, "disableQuestion");
@@ -248,6 +249,10 @@ public class FormParser {
 
             if (input.getReturnContent() == null) {
                 input.setReturnContent(returnContentCommon);
+            }
+
+            if (input.isColumnIndexDeclaredByDefault() && columnIndexString != null) {
+                input.setContentColumnIndex(Integer.valueOf(columnIndexString));
             }
 
             if (defaultQuestionsToEnable != null && input.getQuestionsToEnable() == null) {
@@ -321,9 +326,11 @@ public class FormParser {
             }
 
             AbstractInput abstractAnswerContent = null;
-
+            boolean  columnIndexDeclaredByDefault = false;
+            
             if (columnIndex == null) {
                 columnIndex = "0";
+                columnIndexDeclaredByDefault = true;
             }
 
             if (itemIndex == null) {
@@ -366,6 +373,7 @@ public class FormParser {
             abstractAnswerContent.setContentItemIndex(itemIndex);
             abstractAnswerContent.setOperation(contentOperation);
             abstractAnswerContent.setInputValueType(inputValueType);
+            abstractAnswerContent.setColumnIndexDeclaredByDefault(columnIndexDeclaredByDefault);
 
             String displayContent = inputElement.getTextContent();
 
