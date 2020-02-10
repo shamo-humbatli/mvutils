@@ -99,7 +99,17 @@ public class FormResultBuilder {
                 List<String> inputValues = new ArrayList<>();
                 for (InputResult ir : inputResults) {
 
-                    if (ir.getReturnValue() == null || ir.getColumnIndex() < 0) {
+                    String returnVal = ir.getReturnValue();
+                    
+                    if(returnVal == null)
+                        continue;
+                    
+                    returnVal = returnVal.trim();
+                    
+                    if("".equals(returnVal))
+                        continue;
+                    
+                    if (ir.getColumnIndex() < 0) {
                         continue;
                     }
 
