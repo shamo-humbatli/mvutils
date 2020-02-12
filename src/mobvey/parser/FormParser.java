@@ -151,20 +151,14 @@ public class FormParser {
         try {
             String answerId = GetAttribute(answerElement, "id");
             String answerEnabled = GetAttribute(answerElement, "enabled");
-            String answerRequired = GetAttribute(answerElement, "required");
 
             SimpleAnswer simpleAnswer = new SimpleAnswer();
 
             simpleAnswer.setAnswerId(answerId);
             simpleAnswer.setEnabled(true);
-            simpleAnswer.setRequeired(true);
 
             if (answerEnabled != null) {
                 simpleAnswer.setEnabled(Boolean.valueOf(answerEnabled));
-            }
-
-            if (answerRequired != null) {
-                simpleAnswer.setRequeired(Boolean.valueOf(answerRequired));
             }
 
             NodeList answerContentContainers = answerElement.getChildNodes();

@@ -18,6 +18,7 @@ public class ContentContainer implements Serializable {
     private String displayText = null;
     private ResultTypes resultType = ResultTypes.SINGLE;
     private DisplayTypes displayType;
+    private boolean returnRequeired = false;
 
     private List<AbstractInput> contentInputs = new ArrayList<>();
 
@@ -38,6 +39,14 @@ public class ContentContainer implements Serializable {
 
     public String getDisplayText() {
         return displayText;
+    }
+
+    public boolean isReturnRequeired() {
+        return returnRequeired;
+    }
+
+    public void setReturnRequeired(boolean returnRequeired) {
+        this.returnRequeired = returnRequeired;
     }
 
     public void setDisplayText(String displayText) {

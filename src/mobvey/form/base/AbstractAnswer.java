@@ -12,7 +12,6 @@ import mobvey.form.answer.content.container.ContentContainer;
 public class AbstractAnswer implements Serializable{
 
     private String answerId;
-    private boolean requeired = true;
     private boolean enabled = true;
     private List<ContentContainer> answerContentContainers = new ArrayList<>();
 
@@ -30,14 +29,6 @@ public class AbstractAnswer implements Serializable{
 
     public void setAnswerId(String answerId) {
         this.answerId = answerId;
-    }
-
-    public boolean isRequeired() {
-        return requeired;
-    }
-
-    public void setRequeired(boolean requeired) {
-        this.requeired = requeired;
     }
 
     public List<ContentContainer> getAnswerContentContainers() {
