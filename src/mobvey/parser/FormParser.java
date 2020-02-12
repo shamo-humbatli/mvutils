@@ -200,6 +200,7 @@ public class FormParser {
         String source = GetAttribute(contentContinerNode, "source");
         String returnContentCommon = GetAttribute(contentContinerNode, "return");
         String columnIndexString = GetAttribute(contentContinerNode, "columnIndex");
+        String returnRequiredString = GetAttribute(contentContinerNode, "returnRequired");
 
         String defaultQuestionsToEnable = GetAttribute(contentContinerNode, "enableQuestion");
         String defaultQuestionsToDisable = GetAttribute(contentContinerNode, "disableQuestion");
@@ -219,6 +220,11 @@ public class FormParser {
 
         if (resultType != null) {
             container.setResultType(ResultTypes.valueOf(resultType.toUpperCase()));
+        }
+        
+        if(returnRequiredString != null)
+        {
+            container.setReturnRequeired(Boolean.valueOf(returnRequiredString));
         }
 
         if (source != null) {
