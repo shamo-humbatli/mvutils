@@ -8,6 +8,7 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import mobvey.common.Converters;
+import mobvey.common.Strings;
 import mobvey.form.result.FormResult;
 import mobvey.form.result.InputResult;
 import mobvey.form.result.QuestionResult;
@@ -115,7 +116,7 @@ public class FormResultBuilder {
 
                     inputValues.add(ir.getColumnIndex() + resultValueCombiner + ir.getReturnValue());
                 }
-                questionElement.setTextContent(String.join(resultValueDelimeter, inputValues));
+                questionElement.setTextContent(Strings.Join(resultValueDelimeter, inputValues));
             }
             
             rootDocument.normalize();
