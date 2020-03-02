@@ -215,9 +215,8 @@ public class FormParser {
         if (resultType != null) {
             container.setResultType(ResultTypes.valueOf(resultType.toUpperCase()));
         }
-        
-        if(returnRequiredString != null)
-        {
+
+        if (returnRequiredString != null) {
             container.setReturnRequeired(Boolean.valueOf(returnRequiredString));
         }
 
@@ -301,6 +300,10 @@ public class FormParser {
 
             String enabledQuestions = GetAttribute(inputElement, "enableQuestion");
             String disabledQuestions = GetAttribute(inputElement, "disableQuestion");
+
+            String requiredForReturn = GetAttribute(inputElement, "enableReturnRequired");
+            String notRequiredForReturn = GetAttribute(inputElement, "disableReturnRequired");
+
             String isComplexString = GetAttribute(inputElement, "isComplex");
 
             InputValueTypes inputValueType = InputValueTypes.TEXT;
@@ -326,8 +329,8 @@ public class FormParser {
             }
 
             AbstractInput abstractAnswerContent = null;
-            boolean  columnIndexDeclaredByDefault = false;
-            
+            boolean columnIndexDeclaredByDefault = false;
+
             if (columnIndex == null) {
                 columnIndex = "0";
                 columnIndexDeclaredByDefault = true;
@@ -447,6 +450,18 @@ public class FormParser {
 
                         abstractAnswerContent.AddQuestionToDisable(dq);
                     }
+                }
+            }
+
+            if (requiredForReturn != null) {
+                for (String rfr : requiredForReturn.split(",")) {
+                    abstractAnswerContent.AddContainerIdRequired(rfr, true);
+                }
+            }
+
+            if (notRequiredForReturn != null) {
+                for (String nrfr : notRequiredForReturn.split(",")) {
+                    abstractAnswerContent.AddContainerIdRequired(nrfr, false);
                 }
             }
 

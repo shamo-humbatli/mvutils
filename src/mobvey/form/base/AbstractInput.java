@@ -3,6 +3,7 @@ package mobvey.form.base;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import mobvey.common.KeyValuePair;
 import mobvey.form.answer.content.container.ContentContainer;
 import mobvey.form.enums.InputTypes;
 import mobvey.form.enums.InputValueTypes;
@@ -26,6 +27,8 @@ public class AbstractInput implements Serializable {
 
     private List<String> questionsToEnable;
     private List<String> questionsToDisable;
+
+    private List<KeyValuePair<String, Boolean>> containersRequired;
 
     private List<ContentContainer> contentContainers;
 
@@ -151,11 +154,11 @@ public class AbstractInput implements Serializable {
         if (questionsToDisable == null) {
             questionsToDisable = new ArrayList<>();
         }
-        
+
         if ("".equals(questionId)) {
             return;
         }
-        
+
         questionsToDisable.add(questionId);
     }
 
@@ -177,6 +180,27 @@ public class AbstractInput implements Serializable {
         }
 
         contentContainers.add(contentContainer);
+    }
+
+    public List<KeyValuePair<String, Boolean>> getContainersRequired() {
+        return containersRequired;
+    }
+
+    public void setContainersRequired(List<KeyValuePair<String, Boolean>> containersRequired) {
+        this.containersRequired = containersRequired;
+    }
+
+    public void AddContainerIdRequired(String id, boolean required) {
+        if (containersRequired == null) {
+            containersRequired = new ArrayList<>();
+        }
+
+        containersRequired.add(new KeyValuePair<>(id, required));
+    }
+    
+    public boolean HasContainersToReviewIfRequired()
+    {
+        return containersRequired != null && containersRequired.size() > 0;
     }
 
     @Override
