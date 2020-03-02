@@ -154,7 +154,12 @@ public class FormParser {
 
             SimpleAnswer simpleAnswer = new SimpleAnswer();
 
+            if (answerId == null) {
+                answerId = UUID.randomUUID().toString();
+            }
+
             simpleAnswer.setAnswerId(answerId);
+
             simpleAnswer.setEnabled(true);
 
             if (answerEnabled != null) {

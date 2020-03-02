@@ -16,10 +16,10 @@ import mobvey.form.question.Question;
  * @author Shamo Humbatli
  */
 public class QuestionForm extends QuestionFormData implements IQuestionFormOperation {
-    
+
     private static final Logger logger = Logger.getLogger(QuestionForm.class.getName());
     private final String treeSplitter = "/";
-    
+
     @Override
     public boolean SetReturnRequired(String contentContainerPath, boolean required) {
         boolean result = false;
@@ -27,29 +27,29 @@ public class QuestionForm extends QuestionFormData implements IQuestionFormOpera
             if (contentContainerPath == null) {
                 return false;
             }
-            
+
             contentContainerPath = contentContainerPath.trim();
-            
+
             if ("".equals(contentContainerPath)) {
                 return false;
             }
-            
+
             List<Question> questions = getQuestions();
-            
+
             if (questions == null) {
                 return false;
             }
-            
+
             String[] eTree = contentContainerPath.split(treeSplitter);
 
             //get question
             Question question = questions
                     .stream().filter(q -> q.getQuestionId().equals(eTree[0])).findFirst().orElse(null);
-            
+
             if (question == null) {
                 return false;
             }
-            
+
             if (question.getAnswers() == null) {
                 return false;
             }
@@ -57,7 +57,7 @@ public class QuestionForm extends QuestionFormData implements IQuestionFormOpera
             //get answer
             AbstractAnswer answer = question.getAnswers()
                     .stream().filter(aa -> aa.getAnswerId().equals(eTree[1])).findFirst().orElse(null);
-            
+
             if (answer == null) {
                 return false;
             }
@@ -66,106 +66,104 @@ public class QuestionForm extends QuestionFormData implements IQuestionFormOpera
             if (answer.getAnswerContentContainers() == null) {
                 return false;
             }
-            
+
             ContentContainer baseContainer = answer.getAnswerContentContainers()
                     .stream().filter(cc -> cc.getId().equals(eTree[2])).findFirst().orElse(null);
-            
+
             if (baseContainer == null) {
                 return false;
             }
-            
-            if (eTree.length == 3) {
-                baseContainer.setReturnRequeired(required);
-                return true;
-            }
-            
+
+//            if (eTree.length == 3) {
+//                baseContainer.setReturnRequeired(required);
+//                return true;
+//            }
             ContentContainer containerFound = baseContainer;
+
             for (int subIndex = 3; subIndex < eTree.length; subIndex++) {
                 containerFound = GetChilContentContainer(containerFound, eTree[subIndex]);
             }
-            
+
             if (containerFound == null) {
                 return false;
             }
-            
-            if (eTree.length == 3) {
-                baseContainer.setReturnRequeired(required);
-                return true;
-            }
-            
+
+            containerFound.setReturnRequeired(required);
+            return true;
+
         } catch (Exception exp) {
             logger.log(Level.SEVERE, exp.toString());
             result = false;
         }
-        
+
         return result;
     }
-     
+
     @Override
     public void CheckoutForReturnRequired(List<KeyValuePair<String, Boolean>> returns) {
         try {
-            if (returns == null || returns.size() == 0) {
+            if (returns == null || returns.isEmpty()) {
                 return;
             }
-            
+
             for (KeyValuePair<String, Boolean> pair : returns) {
-                
+
                 if (pair.getKey() == null || pair.getValue() == null) {
                     continue;
                 }
-                
+
                 SetReturnRequired(pair.getKey(), pair.getValue());
             }
         } catch (Exception exp) {
             logger.log(Level.SEVERE, exp.toString());
         }
     }
-    
+
     @Override
     public void CheckoutForReturnRequired(AbstractInput input) {
         if (input == null) {
             return;
         }
-        
+
         if (!input.HasContainersToReviewIfRequired()) {
             return;
         }
-        
+
         CheckoutForReturnRequired(input.getContainersRequired());
     }
-    
-     private ContentContainer GetChilContentContainer(ContentContainer baseContainer, String childId) {
+
+    private ContentContainer GetChilContentContainer(ContentContainer baseContainer, String childId) {
         if (childId == null) {
             return null;
         }
-        
+
         childId = childId.trim();
-        
+
         if ("".equals(childId)) {
             return null;
         }
-        
+
         if (baseContainer == null) {
             return null;
         }
-        
+
         List<AbstractInput> inputs = baseContainer.getContentInputs();
-        
+
         if (inputs == null) {
             return null;
         }
-        
+
         inputs = inputs.stream().filter(i -> i.getContentContainers() != null).collect(Collectors.toList());
-        
+
         for (AbstractInput ai : inputs) {
             for (ContentContainer subContainer : ai.getContentContainers()) {
-                
+
                 if (subContainer.getId().equals(childId)) {
                     return subContainer;
                 }
             }
         }
-        
+
         return null;
     }
 }

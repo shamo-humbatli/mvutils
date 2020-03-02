@@ -35,6 +35,7 @@ public class FormParserTest {
 
         FormParser fp = new FormParser(new File(filePath));
         QuestionForm qf = fp.ParseXml("questions.xml");
+        qf.SetReturnRequired("s12/s12a1/s12a1cc1/s12i2c1", true);
 
         System.out.println("Form info: " + qf.toString());
 
@@ -60,6 +61,7 @@ public class FormParserTest {
     }
 
     private static void ContentContainerDetails(ContentContainer cc) {
+        System.out.println("\n\n================CONTAINER======================");
         System.out.println("Container info: " + cc.toString());
 
         for (AbstractInput ai : cc.getContentInputs()) {
@@ -74,6 +76,11 @@ public class FormParserTest {
         } else if (ai instanceof InputTextContent) {
             InputTextContent itc = (InputTextContent) ai;
             System.out.println("Input text info: " + itc.toString());
+        }
+        
+        if(ai.HasContainersToReviewIfRequired())
+        {
+               System.out.println("============HAS REQUIRED CONTAINERS TO DEAL=============");
         }
 
         if (ai.isComplex()) {
