@@ -5,11 +5,13 @@
  */
 package mobvey.common;
 
+import java.io.Serializable;
+
 /**
  *
- * @author ShamoHumbatli
+ * @author Shamo Humbatli
  */
-public class KeyValuePair<TKey, TValue> {
+public class KeyValuePair<TKey, TValue> implements Serializable{
 
     private TKey key;
     private TValue value;
