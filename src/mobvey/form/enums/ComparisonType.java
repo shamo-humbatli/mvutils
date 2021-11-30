@@ -1,10 +1,10 @@
-package mobvey.form.answer.content.operation;
+package mobvey.form.enums;
 
 /**
  *
  * @author Shamo Humbatli
  */
-public enum ComparisonTypes {
+public enum ComparisonType {
     EQ,
     NT,
     GT,

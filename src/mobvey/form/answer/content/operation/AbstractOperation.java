@@ -1,18 +1,20 @@
 package mobvey.form.answer.content.operation;
 
+import java.io.Serializable;
+
 /**
  *
  * @author Shamo Humbatli
  */
-public class AbstractOperation {
+public class AbstractOperation implements Serializable{
 
-    private final OperationTypes operationType;
+    private final OperationType operationType;
 
-    protected AbstractOperation(OperationTypes operationType) {
+    protected AbstractOperation(OperationType operationType) {
         this.operationType = operationType;
     }
 
-    public OperationTypes getOperationType() {
+    public OperationType getOperationType() {
         return operationType;
     }
 }

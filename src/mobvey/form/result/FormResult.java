@@ -63,6 +63,28 @@ public class FormResult implements Serializable {
         this.questionResults.add(questionResult);
     }
 
+    public FormResult CloneExact()
+    {
+        FormResult fr = new FormResult();
+        fr.setId(id);
+        fr.setLang(lang);
+        fr.setVersion(version);
+        
+        if(questionResults != null)
+        {
+            for(QuestionResult qr : questionResults)
+            {
+                if(qr == null)
+                    continue;
+                
+                QuestionResult qrc = qr.CloneExact();
+                fr.AddQuestionResults(qrc);
+            }
+        }
+        
+        return fr;
+    }
+    
     @Override
     public String toString() {
         return "FormResult{" + "id=" + id + ", version=" + version + ", lang=" + lang + '}';

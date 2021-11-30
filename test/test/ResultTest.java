@@ -2,6 +2,7 @@ package test;
 
 import javax.xml.parsers.ParserConfigurationException;
 import mobvey.form.builder.FormResultBuilder;
+import mobvey.form.enums.ColumnDefinitionType;
 import mobvey.form.result.FormResult;
 import mobvey.form.result.InputResult;
 import mobvey.form.result.QuestionResult;
@@ -14,11 +15,12 @@ public class ResultTest {
 
     public static void main(String[] args) throws ParserConfigurationException {
         InputResult ir = new InputResult();
-        ir.setColumnIndex(0);
+        ir.setColumnDefinition("0");
         ir.setReturnValue("004");
 
         InputResult ir1 = new InputResult();
-        ir1.setColumnIndex(1);
+        ir1.setColumnDefinition("test_col1");
+        ir1.setColumnDefinitionType(ColumnDefinitionType.CN);
         ir1.setReturnValue("005");
 
         QuestionResult qr = new QuestionResult();
@@ -44,5 +46,11 @@ public class ResultTest {
         String resultXmlForRequest = frb.GetFormResultXmlString(fr);
 
         System.out.println(resultXmlForRequest);
+        System.out.println("--------------Cloned Here----------------");
+
+        FormResult frc = fr.CloneExact();
+
+        String rc = frb.GetFormResultXmlString(frc);
+        System.out.println(rc);
     }
 }

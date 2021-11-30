@@ -6,7 +6,7 @@ package mobvey.form.answer.content.operation;
  */
 public class InputOperation extends AbstractOperation{
   
-    public InputOperation(OperationTypes operationType) {
+    public InputOperation(OperationType operationType) {
         super(operationType);
     }
   

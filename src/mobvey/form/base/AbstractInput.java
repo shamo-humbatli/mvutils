@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.List;
 import mobvey.common.KeyValuePair;
 import mobvey.form.answer.content.container.ContentContainer;
+import mobvey.form.answer.content.operation.AbstractOperation;
+import mobvey.form.enums.ColumnDefinitionType;
 import mobvey.form.enums.InputTypes;
 import mobvey.form.enums.InputValueTypes;
 
@@ -12,27 +14,28 @@ import mobvey.form.enums.InputValueTypes;
  *
  * @author Shamo Humbatli
  */
-public class AbstractInput implements Serializable {
+public abstract class AbstractInput implements Serializable {
 
-    private String id = null;
-    private int contentColumnIndex = 0;
-    private boolean columnIndexDeclaredByDefault = true;
-    private String contentItemIndex;
-    private InputValueTypes inputValueType;
-    private String operation;
-    private final InputTypes inputType;
-    private Object displayContent;
-    private String parentId = null;
-    private boolean complex = false;
+    protected String id = null;
+    protected String columnDefinition = "0";
+    protected ColumnDefinitionType columnDefinitionType = ColumnDefinitionType.CI;
+    protected boolean columnDefinitionDeclaredByDefault = true;
+    protected String contentItemIndex;
+    protected InputValueTypes inputValueType;
+    protected AbstractOperation operation;
+    protected final InputTypes inputType;
+    protected Object displayContent;
+    protected String parentId = null;
+    protected boolean complex = false;
 
-    private List<String> questionsToEnable;
-    private List<String> questionsToDisable;
+    protected List<String> questionsToEnable;
+    protected List<String> questionsToDisable;
 
-    private List<KeyValuePair<String, Boolean>> containersRequired;
+    protected List<KeyValuePair<String, Boolean>> containersRequired;
 
-    private List<ContentContainer> contentContainers;
+    protected List<ContentContainer> contentContainers;
 
-    private String returnContent = null;
+    protected String returnContent = null;
 
     public String getId() {
         return id;
@@ -66,14 +69,6 @@ public class AbstractInput implements Serializable {
         this.displayContent = displayContent;
     }
 
-    public boolean isColumnIndexDeclaredByDefault() {
-        return columnIndexDeclaredByDefault;
-    }
-
-    public void setColumnIndexDeclaredByDefault(boolean columnIndexDeclaredByDefault) {
-        this.columnIndexDeclaredByDefault = columnIndexDeclaredByDefault;
-    }
-
     public AbstractInput(InputTypes inputType) {
         this.inputType = inputType;
     }
@@ -82,11 +77,11 @@ public class AbstractInput implements Serializable {
         return inputType;
     }
 
-    public String getOperation() {
+    public AbstractOperation getOperation() {
         return operation;
     }
 
-    public void setOperation(String operation) {
+    public void setOperation(AbstractOperation operation) {
         this.operation = operation;
     }
 
@@ -96,14 +91,6 @@ public class AbstractInput implements Serializable {
 
     public void setInputValueType(InputValueTypes inputValueType) {
         this.inputValueType = inputValueType;
-    }
-
-    public int getContentColumnIndex() {
-        return contentColumnIndex;
-    }
-
-    public void setContentColumnIndex(int contentColumnIndex) {
-        this.contentColumnIndex = contentColumnIndex;
     }
 
     public String getContentItemIndex() {
@@ -203,8 +190,34 @@ public class AbstractInput implements Serializable {
         return containersRequired != null && containersRequired.size() > 0;
     }
 
+    public String getColumnDefinition() {
+        return columnDefinition;
+    }
+
+    public void setColumnDefinition(String columnDefinition) {
+        this.columnDefinition = columnDefinition;
+    }
+
+    public ColumnDefinitionType getColumnDefinitionType() {
+        return columnDefinitionType;
+    }
+
+    public void setColumnDefinitionType(ColumnDefinitionType columnDefinitionType) {
+        this.columnDefinitionType = columnDefinitionType;
+    }
+
+    public boolean isColumnDefinitionDeclaredByDefault() {
+        return columnDefinitionDeclaredByDefault;
+    }
+
+    public void setColumnDefinitionDeclaredByDefault(boolean columnDefinitionDeclaredByDefault) {
+        this.columnDefinitionDeclaredByDefault = columnDefinitionDeclaredByDefault;
+    }
+
+    public abstract AbstractInput CloneExact();
+    
     @Override
     public String toString() {
-        return "AbstractInput{" + "id=" + id + ", contentColumnIndex=" + contentColumnIndex + ", contentItemIndex=" + contentItemIndex + ", inputValueType=" + inputValueType + ", operation=" + operation + ", inputType=" + inputType + ", displayContent=" + displayContent + ", parentId=" + parentId + ", returnContent=" + returnContent + '}';
+        return "AbstractInput{" + "id=" + id + ", columnDefinition=" + columnDefinition + ", columnDefinitionType=" + columnDefinitionType + ", columnDefinitionDeclaredByDefault=" + columnDefinitionDeclaredByDefault + ", contentItemIndex=" + contentItemIndex + ", inputValueType=" + inputValueType + ", operation=" + operation + ", inputType=" + inputType + ", displayContent=" + displayContent + ", parentId=" + parentId + ", complex=" + complex + ", questionsToEnable=" + questionsToEnable + ", questionsToDisable=" + questionsToDisable + ", containersRequired=" + containersRequired + ", returnContent=" + returnContent + '}';
     }
 }

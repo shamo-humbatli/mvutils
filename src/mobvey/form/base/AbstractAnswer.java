@@ -9,11 +9,11 @@ import mobvey.form.answer.content.container.ContentContainer;
  *
  * @author Shamo Humbatli
  */
-public class AbstractAnswer implements Serializable{
+public abstract class AbstractAnswer implements Serializable{
 
-    private String answerId;
-    private boolean enabled = true;
-    private List<ContentContainer> answerContentContainers = new ArrayList<>();
+    protected String answerId;
+    protected boolean enabled = true;
+    protected List<ContentContainer> answerContentContainers = new ArrayList<ContentContainer>();
 
     public boolean isEnabled() {
         return enabled;
@@ -43,4 +43,10 @@ public class AbstractAnswer implements Serializable{
         answerContentContainers.add(contentContainer);
     }
 
+    public abstract AbstractAnswer CloneExact();
+
+    @Override
+    public String toString() {
+        return "AbstractAnswer{" + "answerId=" + answerId + ", enabled=" + enabled + '}';
+    }
 }

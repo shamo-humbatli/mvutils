@@ -81,6 +81,30 @@ public class ContentContainer implements Serializable {
         this.contentInputs.addAll(abstractInput);
     }
 
+    public ContentContainer CloneExact() {
+        ContentContainer cc = new ContentContainer();
+
+        cc.setDisplayText(displayText);
+        cc.setDisplayType(displayType);
+        cc.setId(id);
+        cc.setResultType(resultType);
+        cc.setReturnRequeired(returnRequeired);
+
+        if (contentInputs != null) {
+            for (AbstractInput ai : getContentInputs()) {
+
+                if (ai == null) {
+                    continue;
+                }
+
+                AbstractInput clonedAi = ai.CloneExact();
+                cc.AddContentInput(clonedAi);
+            }
+        }
+
+        return cc;
+    }
+
     @Override
     public String toString() {
         return "ContentContainer{" + "id=" + id + ", displayText=" + displayText + ", resultType=" + resultType + ", displayType=" + displayType + '}';

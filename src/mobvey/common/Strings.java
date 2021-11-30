@@ -35,4 +35,9 @@ public class Strings {
         
         return result;
     }
+    
+    public static boolean HasContent(String value)
+    {
+        return value != null && !value.isBlank();
+    }
 }

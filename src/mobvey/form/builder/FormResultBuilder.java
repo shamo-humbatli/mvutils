@@ -110,11 +110,11 @@ public class FormResultBuilder {
                     if("".equals(returnVal))
                         continue;
                     
-                    if (ir.getColumnIndex() < 0) {
+                    if (!ir.hasColumnDefinition()) {
                         continue;
                     }
-
-                    inputValues.add(ir.getColumnIndex() + resultValueCombiner + ir.getReturnValue());
+                    
+                    inputValues.add(ir.getColumnDescription() + resultValueCombiner + ir.getReturnValue());
                 }
                 questionElement.setTextContent(Strings.Join(resultValueDelimeter, inputValues));
             }

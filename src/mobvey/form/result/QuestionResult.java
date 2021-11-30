@@ -32,4 +32,24 @@ public class QuestionResult implements Serializable {
     {
         this.inputResults.add(inputResult);
     }
+    
+    public QuestionResult CloneExact()
+    {
+        QuestionResult qr = new QuestionResult();
+        qr.setId(id);
+        
+        if(inputResults != null)
+        {
+            for(InputResult ir : inputResults)
+            {
+                if(ir == null)
+                    continue;
+                
+                InputResult irc = ir.CloneExact();
+                qr.AddInputResult(irc);
+            }
+        }
+        
+        return qr;
+    }
 }

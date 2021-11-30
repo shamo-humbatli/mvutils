@@ -13,6 +13,25 @@ public class Question implements Serializable {
 
     private String questionId;
     private String questionText;
+    private String itemIndex;
+    private boolean itemIndexing = true;
+
+    public boolean isItemIndexing() {
+        return itemIndexing;
+    }
+
+    public void setItemIndexing(boolean itemIndexing) {
+        this.itemIndexing = itemIndexing;
+    }
+    private boolean forOperator = false;
+
+    public boolean isForOperator() {
+        return forOperator;
+    }
+
+    public void setIsForOperator(boolean isForOperator) {
+        this.forOperator = isForOperator;
+    }
     private boolean enabled = true;
 
     private List<AbstractAnswer> answers;
@@ -57,8 +76,41 @@ public class Question implements Serializable {
         answers.add(answer);
     }
 
+    public String getItemIndex() {
+        return itemIndex;
+    }
+
+    public void setItemIndex(String itemIndex) {
+        this.itemIndex = itemIndex;
+    }
+
+    public Question CloneExact() {
+        Question q = new Question();
+
+        q.setEnabled(enabled);
+        q.setIsForOperator(forOperator);
+        q.setItemIndex(itemIndex);
+        q.setQuestionId(questionId);
+        q.setQuestionText(questionText);
+        q.setItemIndexing(itemIndexing);
+
+        if (answers != null) {
+            for (AbstractAnswer answr : answers) {
+
+                if (answr == null) {
+                    continue;
+                }
+
+                AbstractAnswer answrCloned = answr.CloneExact();
+                q.AddAnswer(answrCloned);
+            }
+        }
+
+        return q;
+    }
+
     @Override
     public String toString() {
-        return "Question{" + "questionId=" + questionId + ", questionText=" + questionText + ", enabled=" + enabled + '}';
+        return "Question{" + "questionId=" + questionId + ", questionText=" + questionText + ", itemIndex=" + itemIndex + ", forOperator=" + forOperator + ", enabled=" + enabled + '}';
     }
 }

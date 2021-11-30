@@ -11,11 +11,13 @@ import mobvey.form.question.Question;
  */
 public class QuestionFormData implements Serializable {
 
-    private List<Question> questions;
-    private String formId;
-    private String formLanguage;
-    private String formVersion;
-    private String description;
+    protected List<Question> questions;
+    protected String formId;
+    protected String formLanguage;
+    protected String formVersion;
+    protected String description;    
+    protected String title;
+
 
     public String getDescription() {
         return description;
@@ -69,8 +71,18 @@ public class QuestionFormData implements Serializable {
         return true;
     }
 
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
     @Override
     public String toString() {
-        return "QuestionForm{" + "formId=" + formId + ", formLanguage=" + formLanguage + ", formVersion=" + formVersion + ", description=" + description + '}';
+        return "QuestionFormData{" + "formId=" + formId + ", formLanguage=" + formLanguage + ", formVersion=" + formVersion + ", description=" + description + ", title=" + title + '}';
     }
+    
+    
 }
