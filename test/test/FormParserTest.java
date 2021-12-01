@@ -37,7 +37,7 @@ public class FormParserTest {
         }
 
         FormParser fp = new FormParser(new File(filePath));
-        QuestionForm qf = fp.ParseXml("questions_ltourism.xml");
+        QuestionForm qf = fp.ParseXml("questions_workforce.xml");
         qf.SetReturnRequired("s12/s12a1/s12a1cc1/s12i2c1", true);
 
         System.out.println("Form info: " + qf.toString());

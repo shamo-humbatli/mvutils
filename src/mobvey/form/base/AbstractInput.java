@@ -27,6 +27,9 @@ public abstract class AbstractInput implements Serializable {
     protected Object displayContent;
     protected String parentId = null;
     protected boolean complex = false;
+    
+    protected String minValue;    
+    protected String maxValue;
 
     protected List<String> questionsToEnable;
     protected List<String> questionsToDisable;
@@ -212,6 +215,22 @@ public abstract class AbstractInput implements Serializable {
 
     public void setColumnDefinitionDeclaredByDefault(boolean columnDefinitionDeclaredByDefault) {
         this.columnDefinitionDeclaredByDefault = columnDefinitionDeclaredByDefault;
+    }
+
+    public String getMinValue() {
+        return minValue;
+    }
+
+    public void setMinValue(String minValue) {
+        this.minValue = minValue;
+    }
+
+    public String getMaxValue() {
+        return maxValue;
+    }
+
+    public void setMaxValue(String maxValue) {
+        this.maxValue = maxValue;
     }
 
     public abstract AbstractInput CloneExact();

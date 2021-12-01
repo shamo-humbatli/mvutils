@@ -104,6 +104,11 @@ public class ContentContainer implements Serializable {
 
         return cc;
     }
+    
+    public boolean hasInputs()
+    {
+        return contentInputs != null && contentInputs.size() > 0;
+    }
 
     @Override
     public String toString() {

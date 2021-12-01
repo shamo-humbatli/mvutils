@@ -51,6 +51,8 @@ public class InputTextContent extends AbstractInput {
         itc.setDisplayContent(displayContent);
         itc.setReadonly(readonly);
         itc.setPlaceHolder(placeHolder);
+        itc.setMinValue(minValue);
+        itc.setMaxValue(maxValue);
 
         if (containersRequired != null) {
             itc.setContainersRequired(new ArrayList<>(containersRequired));

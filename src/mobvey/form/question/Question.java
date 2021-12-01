@@ -3,6 +3,7 @@ package mobvey.form.question;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import mobvey.common.Strings;
 import mobvey.form.base.AbstractAnswer;
 
 /**
@@ -15,9 +16,15 @@ public class Question implements Serializable {
     private String questionText;
     private String itemIndex;
     private boolean itemIndexing = true;
+    protected String explanation;
 
     public boolean isItemIndexing() {
         return itemIndexing;
+    }
+    
+    public boolean hasExplanation()
+    {
+        return Strings.HasContent(explanation);
     }
 
     public void setItemIndexing(boolean itemIndexing) {
@@ -84,6 +91,14 @@ public class Question implements Serializable {
         this.itemIndex = itemIndex;
     }
 
+    public String getExplanation() {
+        return explanation;
+    }
+
+    public void setExplanation(String explanation) {
+        this.explanation = explanation;
+    }
+
     public Question CloneExact() {
         Question q = new Question();
 
@@ -93,6 +108,7 @@ public class Question implements Serializable {
         q.setQuestionId(questionId);
         q.setQuestionText(questionText);
         q.setItemIndexing(itemIndexing);
+        q.setExplanation(explanation);
 
         if (answers != null) {
             for (AbstractAnswer answr : answers) {
@@ -111,6 +127,13 @@ public class Question implements Serializable {
 
     @Override
     public String toString() {
-        return "Question{" + "questionId=" + questionId + ", questionText=" + questionText + ", itemIndex=" + itemIndex + ", forOperator=" + forOperator + ", enabled=" + enabled + '}';
+        return "Question{" 
+                + "questionId=" + questionId 
+                + ", questionText=" + questionText 
+                + ", itemIndex=" + itemIndex 
+                + ", forOperator=" + forOperator 
+                + ", enabled=" + enabled 
+                + ", explanation=" + explanation 
+                + '}';
     }
 }
