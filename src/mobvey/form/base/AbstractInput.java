@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import mobvey.common.KeyValuePair;
+import mobvey.common.Strings;
 import mobvey.form.answer.content.container.ContentContainer;
 import mobvey.form.answer.content.operation.AbstractOperation;
 import mobvey.form.enums.ColumnDefinitionType;
@@ -27,12 +28,15 @@ public abstract class AbstractInput implements Serializable {
     protected Object displayContent;
     protected String parentId = null;
     protected boolean complex = false;
-    
-    protected String minValue;    
+
+    protected String minValue;
     protected String maxValue;
 
     protected List<String> questionsToEnable;
     protected List<String> questionsToDisable;
+
+    protected List<String> elementsToEnable;
+    protected List<String> elementsToDisable;
 
     protected List<KeyValuePair<String, Boolean>> containersRequired;
 
@@ -112,6 +116,47 @@ public abstract class AbstractInput implements Serializable {
         this.returnContent = returnContent;
     }
 
+
+    public void AddElementToEnable(String itemId) {
+        if (elementsToEnable == null) {
+            elementsToEnable = new ArrayList<>();
+        }
+
+        if (Strings.isNothing(itemId)) {
+            return;
+        }
+
+        elementsToEnable.add(itemId);
+    }
+
+    public List<String> getElementsToEnable() {
+        return elementsToEnable;
+    }
+
+    public void setElementsToEnable(List<String> elementsToEnable) {
+        this.elementsToEnable = elementsToEnable;
+    }
+
+    public List<String> getElementsToDisable() {
+        return elementsToDisable;
+    }
+
+    public void setElementsToDisable(List<String> elementsToDisable) {
+        this.elementsToDisable = elementsToDisable;
+    }
+
+    public void AddElementToDisable(String itemId) {
+        if (elementsToDisable == null) {
+            elementsToDisable = new ArrayList<>();
+        }
+
+        if (Strings.isNothing(itemId)) {
+            return;
+        }
+
+        elementsToDisable.add(itemId);
+    }
+
     public void AddQuestionToEnable(String questionId) {
         if (questionsToEnable == null) {
             questionsToEnable = new ArrayList<>();
@@ -187,9 +232,8 @@ public abstract class AbstractInput implements Serializable {
 
         containersRequired.add(new KeyValuePair<>(id, required));
     }
-    
-    public boolean HasContainersToReviewIfRequired()
-    {
+
+    public boolean HasContainersToReviewIfRequired() {
         return containersRequired != null && containersRequired.size() > 0;
     }
 
@@ -234,7 +278,7 @@ public abstract class AbstractInput implements Serializable {
     }
 
     public abstract AbstractInput CloneExact();
-    
+
     @Override
     public String toString() {
         return "AbstractInput{" + "id=" + id + ", columnDefinition=" + columnDefinition + ", columnDefinitionType=" + columnDefinitionType + ", columnDefinitionDeclaredByDefault=" + columnDefinitionDeclaredByDefault + ", contentItemIndex=" + contentItemIndex + ", inputValueType=" + inputValueType + ", operation=" + operation + ", inputType=" + inputType + ", displayContent=" + displayContent + ", parentId=" + parentId + ", complex=" + complex + ", questionsToEnable=" + questionsToEnable + ", questionsToDisable=" + questionsToDisable + ", containersRequired=" + containersRequired + ", returnContent=" + returnContent + '}';

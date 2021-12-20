@@ -37,6 +37,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import mobvey.common.Strings;
 
 /**
  *
@@ -158,12 +159,9 @@ public class FormParser {
 
                         if (questionElement.getNodeName().equals("questionText")) {
                             question.setQuestionText(questionElement.getTextContent());
-                        } 
-                        else if(questionElement.getNodeName().equals("explanation"))
-                        {
+                        } else if (questionElement.getNodeName().equals("explanation")) {
                             question.setExplanation(questionElement.getTextContent());
-                        }
-                        else if (questionElement.getNodeName().equals("answer")) {
+                        } else if (questionElement.getNodeName().equals("answer")) {
                             AbstractAnswer answer = BuildAnswer(questionElement);
                             question.AddAnswer(answer);
                         }
@@ -246,6 +244,9 @@ public class FormParser {
 
         String defaultQuestionsToEnable = GetAttribute(contentContinerNode, "enableQuestion");
         String defaultQuestionsToDisable = GetAttribute(contentContinerNode, "disableQuestion");
+
+        String defaultElementsToEnable = GetAttribute(contentContinerNode, "enableElement");
+        String defaultElementsToDisable = GetAttribute(contentContinerNode, "disableElement");
 
         String iig = GetAttribute(contentContinerNode, "itemIndexGeneration");
         String rg = GetAttribute(contentContinerNode, "returnGeneration");
@@ -334,6 +335,32 @@ public class FormParser {
                     }
 
                     input.AddQuestionToDisable(dq);
+                }
+            }
+
+            if (defaultElementsToEnable != null && input.getElementsToEnable() == null) {
+
+                for (String item : defaultElementsToEnable.split(",")) {
+                    item = item.trim();
+
+                    if (Strings.isNothing(item)) {
+                        continue;
+                    }
+
+                    input.AddElementToEnable(item);
+                }
+            }
+
+            if (defaultElementsToDisable != null && input.getElementsToDisable() == null) {
+
+                for (String item : defaultElementsToDisable.split(",")) {
+                    item = item.trim();
+
+                    if (Strings.isNothing(item)) {
+                        continue;
+                    }
+
+                    input.AddElementToDisable(item);
                 }
             }
 
@@ -455,6 +482,9 @@ public class FormParser {
 
             String enabledQuestions = GetAttribute(inputElement, "enableQuestion");
             String disabledQuestions = GetAttribute(inputElement, "disableQuestion");
+
+            String enabledItems = GetAttribute(inputElement, "enableElement");
+            String disabledItems = GetAttribute(inputElement, "disableElement");
 
             String requiredForReturn = GetAttribute(inputElement, "enableReturnRequired");
             String notRequiredForReturn = GetAttribute(inputElement, "disableReturnRequired");
@@ -620,6 +650,34 @@ public class FormParser {
                 }
             }
 
+            if (Strings.HasContent(enabledItems)) {
+
+                for (String ei : enabledItems.split(",")) {
+
+                    ei = ei.trim();
+
+                    if (Strings.isNothing(ei)) {
+                        continue;
+                    }
+
+                    abstractAnswerContent.AddElementToEnable(ei);
+                }
+            }
+
+            if (Strings.HasContent(disabledItems)) {
+
+                for (String di : disabledItems.split(",")) {
+
+                    di = di.trim();
+
+                    if (Strings.isNothing(di)) {
+                        continue;
+                    }
+
+                    abstractAnswerContent.AddElementToDisable(di);
+                }
+            }
+
             if (requiredForReturn != null) {
                 for (String rfr : requiredForReturn.split(",")) {
                     abstractAnswerContent.AddContainerIdRequired(rfr, true);
@@ -755,7 +813,7 @@ public class FormParser {
         List<AbstractInput> aiSrs = new ArrayList<>();
 
         for (AbstractInput ai : inputs) {
-            if (!ai.HasOperation() 
+            if (!ai.HasOperation()
                     || !ai.getOperation().getOperationType().equals(OperationType.SUM)) {
                 continue;
             }
@@ -797,13 +855,14 @@ public class FormParser {
             if (node.getAttributes().item(attrIndx).getNodeName().equals(attrName)) {
                 String attr = node.getAttributes().getNamedItem(attrName).getNodeValue().trim();
 
-                if ("".equals(attr)) {
+                if (Strings.isNothing(attr)) {
                     return null;
                 }
 
-                return attr;
+                return attr.trim();
             }
         }
+        
         return null;
     }
 

@@ -31,6 +31,14 @@ public class InputOptionContent extends AbstractInput {
         ioc.setReturnContent(returnContent);
         ioc.setDisplayContent(displayContent);
 
+        if (elementsToEnable != null) {
+            ioc.setElementsToEnable(new ArrayList<>(elementsToEnable));
+        }
+        
+        if (elementsToDisable != null) {
+            ioc.setElementsToDisable(new ArrayList<>(elementsToDisable));
+        }
+
         if (containersRequired != null) {
             ioc.setContainersRequired(new ArrayList<>(containersRequired));
         }

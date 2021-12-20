@@ -40,4 +40,9 @@ public class Strings {
     {
         return value != null && !value.isBlank();
     }
+    
+    public static boolean isNothing(String value)
+    {
+        return !HasContent(value);
+    }
 }

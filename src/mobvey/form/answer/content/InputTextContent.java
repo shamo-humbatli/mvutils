@@ -54,6 +54,14 @@ public class InputTextContent extends AbstractInput {
         itc.setMinValue(minValue);
         itc.setMaxValue(maxValue);
 
+        if (elementsToEnable != null) {
+            itc.setElementsToEnable(new ArrayList<>(elementsToEnable));
+        }
+
+        if (elementsToDisable != null) {
+            itc.setElementsToDisable(new ArrayList<>(elementsToDisable));
+        }
+
         if (containersRequired != null) {
             itc.setContainersRequired(new ArrayList<>(containersRequired));
         }
