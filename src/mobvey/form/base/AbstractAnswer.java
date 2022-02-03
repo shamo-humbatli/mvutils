@@ -1,52 +1,47 @@
 package mobvey.form.base;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import mobvey.form.answer.content.container.ContentContainer;
+import mobvey.form.enums.FormElementType;
 
 /**
  *
  * @author Shamo Humbatli
  */
-public abstract class AbstractAnswer implements Serializable{
+public abstract class AbstractAnswer extends AbstractFormElement {
 
-    protected String answerId;
-    protected boolean enabled = true;
+    public AbstractAnswer(FormElementType elementType) {
+        super(elementType);
+    }
+
     protected List<ContentContainer> answerContentContainers = new ArrayList<ContentContainer>();
 
-    public boolean isEnabled() {
-        return enabled;
-    }
-
-    public void setEnabled(boolean enabled) {
-        this.enabled = enabled;
-    }
-
-    public String getAnswerId() {
-        return answerId;
-    }
-
-    public void setAnswerId(String answerId) {
-        this.answerId = answerId;
-    }
-
     public List<ContentContainer> getAnswerContentContainers() {
+
+        if (answerContentContainers == null) {
+            answerContentContainers = new ArrayList<ContentContainer>();
+        }
+
         return answerContentContainers;
     }
 
     public void setAnswerContentContainers(List<ContentContainer> answerContentContainers) {
         this.answerContentContainers = answerContentContainers;
+        setParent(answerContentContainers, this);
     }
 
     public void AddContentContainer(ContentContainer contentContainer) {
-        answerContentContainers.add(contentContainer);
+        if(contentContainer == null)
+            return;
+        
+        contentContainer.setParent(this);
+        getAnswerContentContainers().add(contentContainer);
     }
 
-    public abstract AbstractAnswer CloneExact();
 
     @Override
     public String toString() {
-        return "AbstractAnswer{" + "answerId=" + answerId + ", enabled=" + enabled + '}';
+        return "AbstractAnswer{" + "answerId=" + _id + ", enabled=" + _enabled + '}';
     }
 }

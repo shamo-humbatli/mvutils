@@ -38,8 +38,8 @@ public class ResultTest {
         FormResult fr = new FormResult("03120459", "1");
         fr.setLang("az"); //this is not important
 
-        fr.AddQuestionResults(qr);
-        fr.AddQuestionResults(qr1);
+        fr.AddQuestionResult(qr);
+        fr.AddQuestionResult(qr1);
 
         FormResultBuilder frb = new FormResultBuilder();
 

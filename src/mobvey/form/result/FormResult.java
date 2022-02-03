@@ -52,6 +52,10 @@ public class FormResult implements Serializable {
     }
 
     public List<QuestionResult> getQuestionResults() {
+        
+        if(questionResults == null)
+            questionResults = new ArrayList<>();
+        
         return questionResults;
     }
 
@@ -59,7 +63,7 @@ public class FormResult implements Serializable {
         this.questionResults = questionResults;
     }
 
-    public void AddQuestionResults(QuestionResult questionResult) {
+    public void AddQuestionResult(QuestionResult questionResult) {
         this.questionResults.add(questionResult);
     }
 
@@ -78,7 +82,7 @@ public class FormResult implements Serializable {
                     continue;
                 
                 QuestionResult qrc = qr.CloneExact();
-                fr.AddQuestionResults(qrc);
+                fr.AddQuestionResult(qrc);
             }
         }
         

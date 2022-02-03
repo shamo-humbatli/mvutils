@@ -52,4 +52,9 @@ public class QuestionResult implements Serializable {
         
         return qr;
     }
+
+    @Override
+    public String toString() {
+        return "QuestionResult{" + "id=" + id + '}';
+    }
 }

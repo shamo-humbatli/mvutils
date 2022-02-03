@@ -1,6 +1,7 @@
 package mobvey.form.result;
 
 import java.io.Serializable;
+import mobvey.common.Strings;
 import mobvey.form.enums.ColumnDefinitionType;
 
 /**
@@ -13,7 +14,6 @@ public class InputResult implements Serializable {
     private String columnDefinition;
     private ColumnDefinitionType columnDefinitionType = ColumnDefinitionType.CI;
 
-    private String columnName;
     private String returnValue;
 
     public String getColumnDescription()
@@ -23,7 +23,7 @@ public class InputResult implements Serializable {
     
     public boolean hasColumnDefinition()
     {
-        return columnDefinition != null && !columnDefinition.isBlank();
+        return Strings.hasContent(columnDefinition);
     }
     
     public String getId() {
@@ -42,38 +42,18 @@ public class InputResult implements Serializable {
         this.returnValue = returnValue;
     }
 
-    public String getColumnName() {
-        return columnName;
-    }
-
-    public void setColumnName(String columnName) {
-        this.columnName = columnName;
-    }
-
-    /**
-     * @return the columnDefinition
-     */
     public String getColumnDefinition() {
         return columnDefinition;
     }
 
-    /**
-     * @param columnDefinition the columnDefinition to set
-     */
     public void setColumnDefinition(String columnDefinition) {
         this.columnDefinition = columnDefinition;
     }
 
-    /**
-     * @return the columnDefinitionType
-     */
     public ColumnDefinitionType getColumnDefinitionType() {
         return columnDefinitionType;
     }
 
-    /**
-     * @param columnDefinitionType the columnDefinitionType to set
-     */
     public void setColumnDefinitionType(ColumnDefinitionType columnDefinitionType) {
         this.columnDefinitionType = columnDefinitionType;
     }
@@ -87,13 +67,12 @@ public class InputResult implements Serializable {
         ir.setColumnDefinition(columnDefinition);
         ir.setColumnDefinitionType(columnDefinitionType);
         ir.setId(id);
-        ir.setColumnName(columnName);
         
         return ir;
     }
     
     @Override
     public String toString() {
-        return "InputResult{" + "id=" + id + ", columnDefinition=" + columnDefinition + ", columnDefinitionType=" + columnDefinitionType + ", columnName=" + columnName + ", returnValue=" + returnValue + '}';
+        return "InputResult{" + "id=" + id + ", columnDefinition=" + columnDefinition + ", columnDefinitionType=" + columnDefinitionType + ", returnValue=" + returnValue + '}';
     }
 }

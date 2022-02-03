@@ -1,190 +1,118 @@
 package mobvey.form;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import java.util.stream.Collectors;
-import mobvey.common.KeyValuePair;
-import mobvey.form.answer.content.container.ContentContainer;
-import mobvey.form.base.AbstractAnswer;
-import mobvey.form.base.AbstractInput;
-import mobvey.form.operation.IQuestionFormOperation;
+import mobvey.form.base.AbstractFormElement;
+import mobvey.form.enums.FormElementType;
 import mobvey.form.question.Question;
 
 /**
  *
  * @author Shamo Humbatli
  */
-public class QuestionForm extends QuestionFormData implements IQuestionFormOperation {
-    
-    private static final Logger logger = Logger.getLogger(QuestionForm.class.getName());
-    private final String treeSplitter = "/";
-    
-    @Override
-    public boolean SetReturnRequired(String contentContainerPath, boolean required) {
-        boolean result = false;
-        try {
-            if (contentContainerPath == null) {
-                return false;
-            }
-            
-            contentContainerPath = contentContainerPath.trim();
-            
-            if ("".equals(contentContainerPath)) {
-                return false;
-            }
-            
-            List<Question> questions = getQuestions();
-            
-            if (questions == null) {
-                return false;
-            }
-            
-            String[] eTree = contentContainerPath.split(treeSplitter);
+public class QuestionForm extends AbstractFormElement {
 
-            //get question
-            Question question = questions
-                    .stream().filter(q -> q.getQuestionId().equals(eTree[0])).findFirst().orElse(null);
-            
-            if (question == null) {
-                return false;
-            }
-            
-            if (question.getAnswers() == null) {
-                return false;
-            }
-
-            //get answer
-            AbstractAnswer answer = question.getAnswers()
-                    .stream().filter(aa -> aa.getAnswerId().equals(eTree[1])).findFirst().orElse(null);
-            
-            if (answer == null) {
-                return false;
-            }
-
-            //get base content container
-            if (answer.getAnswerContentContainers() == null) {
-                return false;
-            }
-            
-            ContentContainer baseContainer = answer.getAnswerContentContainers()
-                    .stream().filter(cc -> cc.getId().equals(eTree[2])).findFirst().orElse(null);
-            
-            if (baseContainer == null) {
-                return false;
-            }
-
-//            if (eTree.length == 3) {
-//                baseContainer.setReturnRequeired(required);
-//                return true;
-//            }
-            ContentContainer containerFound = baseContainer;
-            
-            for (int subIndex = 3; subIndex < eTree.length; subIndex++) {
-                containerFound = GetChilContentContainer(containerFound, eTree[subIndex]);
-            }
-            
-            if (containerFound == null) {
-                return false;
-            }
-            
-            containerFound.setReturnRequeired(required);
-            return true;
-            
-        } catch (Exception exp) {
-            logger.log(Level.SEVERE, exp.toString());
-            result = false;
-        }
-        
-        return result;
+    public QuestionForm() {
+        super(FormElementType.FORM);
     }
     
-    @Override
-    public void CheckoutForReturnRequired(List<KeyValuePair<String, Boolean>> returns) {
-        try {
-            if (returns == null || returns.isEmpty()) {
-                return;
-            }
-            
-            for (KeyValuePair<String, Boolean> pair : returns) {
-                
-                if (pair.getKey() == null || pair.getValue() == null) {
+    protected List<Question> _questions;
+    protected String _language;
+    protected String _version;
+    protected String _description;
+    protected String _title;
+
+    public String getDescription() {
+        return _description;
+    }
+
+    public void setDescription(String description) {
+        this._description = description;
+    }
+
+    public String getLanguage() {
+        return _language;
+    }
+
+    public void setLanguage(String formLanguage) {
+        this._language = formLanguage;
+    }
+
+    public String getVersion() {
+        return _version;
+    }
+
+    public void setVersion(String formVersion) {
+        this._version = formVersion;
+    }
+
+    public void AddQuestion(Question question) {
+        if (_questions == null) {
+            _questions = new ArrayList<>();
+        }
+
+        if(question == null)
+            return;
+        
+        question.setParent(this);
+        
+        _questions.add(question);
+    }
+
+    public List<Question> getQuestions() {
+
+        if (_questions == null) {
+            _questions = new ArrayList<Question>();
+        }
+
+        return _questions;
+    }
+
+    public boolean hasQuestions() {
+        if (_questions == null || _questions.isEmpty()) {
+            return false;
+        }
+
+        return true;
+    }
+
+    public String getTitle() {
+        return _title;
+    }
+
+    public void setTitle(String title) {
+        this._title = title;
+    }
+    
+     @Override
+    public QuestionForm CloneExact() {
+
+        QuestionForm qf = new QuestionForm();
+
+        qf.setDescription(getDescription());
+        qf.setId(getId());
+        qf.setLanguage(getLanguage());
+        qf.setVersion(getVersion());
+        qf.setTitle(getTitle());
+
+        if (_questions != null) {
+            for (Question q : getQuestions()) {
+
+                if (q == null) {
                     continue;
                 }
-                
-                SetReturnRequired(pair.getKey(), pair.getValue());
-            }
-        } catch (Exception exp) {
-            logger.log(Level.SEVERE, exp.toString());
-        }
-    }
-    
-    @Override
-    public void CheckoutForReturnRequired(AbstractInput input) {
-        if (input == null) {
-            return;
-        }
-        
-        if (!input.HasContainersToReviewIfRequired()) {
-            return;
-        }
-        
-        CheckoutForReturnRequired(input.getContainersRequired());
-    }
-    
-    private ContentContainer GetChilContentContainer(ContentContainer baseContainer, String childId) {
-        if (childId == null) {
-            return null;
-        }
-        
-        childId = childId.trim();
-        
-        if ("".equals(childId)) {
-            return null;
-        }
-        
-        if (baseContainer == null) {
-            return null;
-        }
-        
-        List<AbstractInput> inputs = baseContainer.getContentInputs();
-        
-        if (inputs == null) {
-            return null;
-        }
-        
-        inputs = inputs.stream().filter(i -> i.getContentContainers() != null).collect(Collectors.toList());
-        
-        for (AbstractInput ai : inputs) {
-            for (ContentContainer subContainer : ai.getContentContainers()) {
-                
-                if (subContainer.getId().equals(childId)) {
-                    return subContainer;
-                }
-            }
-        }
-        
-        return null;
-    }
-    
-    @Override
-    public QuestionForm CloneExact() {
-        
-        QuestionForm qf = new QuestionForm();
-        
-        qf.setDescription(getDescription());
-        qf.setFormId(getFormId());
-        qf.setFormLanguage(getFormLanguage());
-        qf.setFormVersion(getFormVersion());
-        qf.setTitle(getTitle());
-        
-        if (questions != null) {
-            for (Question q : getQuestions()) {
+
                 Question qCloned = q.CloneExact();
                 qf.AddQuestion(qCloned);
             }
         }
-        
+
         return qf;
     }
+
+    @Override
+    public String toString() {
+        return "QuestionFormData{" + "formId=" + _id + ", formLanguage=" + _language + ", formVersion=" + _version + ", description=" + _description + ", title=" + _title + '}';
+    }
+
 }

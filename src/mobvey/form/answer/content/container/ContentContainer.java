@@ -1,40 +1,29 @@
 package mobvey.form.answer.content.container;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import mobvey.form.base.AbstractFormElement;
 import mobvey.form.base.AbstractInput;
-import mobvey.form.enums.DisplayTypes;
-import mobvey.form.enums.ResultTypes;
+import mobvey.form.enums.DisplayType;
+import mobvey.form.enums.FormElementType;
+import mobvey.form.enums.ResultType;
 
 /**
  *
  * @author Shamo Humbatli
  */
-public class ContentContainer implements Serializable {
+public class ContentContainer extends AbstractFormElement {
 
-    private String id = null;
     private String displayText = null;
-    private ResultTypes resultType = ResultTypes.SINGLE;
-    private DisplayTypes displayType;
+    private ResultType resultType = ResultType.SINGLE;
+    private DisplayType displayType;
     private boolean returnRequeired = false;
 
     private List<AbstractInput> contentInputs = new ArrayList<>();
 
     public ContentContainer() {
-    }
-
-    public ContentContainer(DisplayTypes displayType) {
-        this.displayType = displayType;
-    }
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
+        super(FormElementType.CONTENT_CONTAINER);
     }
 
     public String getDisplayText() {
@@ -53,42 +42,66 @@ public class ContentContainer implements Serializable {
         this.displayText = displayText;
     }
 
-    public ResultTypes getResultType() {
+    public ResultType getResultType() {
         return resultType;
     }
 
-    public void setResultType(ResultTypes resultType) {
+    public void setResultType(ResultType resultType) {
         this.resultType = resultType;
     }
 
-    public DisplayTypes getDisplayType() {
+    public DisplayType getDisplayType() {
         return displayType;
     }
 
-    public void setDisplayType(DisplayTypes displayType) {
+    public void setDisplayType(DisplayType displayType) {
         this.displayType = displayType;
     }
 
     public List<AbstractInput> getContentInputs() {
+        if (contentInputs == null) {
+            contentInputs = new ArrayList<AbstractInput>();
+        }
         return contentInputs;
     }
 
     public void AddContentInput(AbstractInput abstractInput) {
-        this.contentInputs.add(abstractInput);
+
+        if (abstractInput == null) {
+            return;
+        }
+
+        abstractInput.setParent(this);
+
+        this.getContentInputs().add(abstractInput);
     }
 
-    public void AddContentInputsRange(Collection<? extends AbstractInput> abstractInput) {
-        this.contentInputs.addAll(abstractInput);
+    public void AddContentInputsRange(Collection<? extends AbstractInput> abstractInputs) {
+
+        if (abstractInputs == null) {
+            return;
+        }
+
+        setParent(contentInputs, this);
+        
+        this.getContentInputs().addAll(abstractInputs);
     }
 
+    @Override
     public ContentContainer CloneExact() {
         ContentContainer cc = new ContentContainer();
 
         cc.setDisplayText(displayText);
         cc.setDisplayType(displayType);
-        cc.setId(id);
+        cc.setId(_id);
+        cc.setParentId(_parentId);
+        cc.setEnabled(_enabled);
         cc.setResultType(resultType);
         cc.setReturnRequeired(returnRequeired);
+
+        if (_events != null) {
+            cc.setEvents(new ArrayList<>(_events));
+        }
 
         if (contentInputs != null) {
             for (AbstractInput ai : getContentInputs()) {
@@ -97,21 +110,20 @@ public class ContentContainer implements Serializable {
                     continue;
                 }
 
-                AbstractInput clonedAi = ai.CloneExact();
+                AbstractInput clonedAi = (AbstractInput)ai.CloneExact();
                 cc.AddContentInput(clonedAi);
             }
         }
 
         return cc;
     }
-    
-    public boolean hasInputs()
-    {
+
+    public boolean hasInputs() {
         return contentInputs != null && contentInputs.size() > 0;
     }
 
     @Override
     public String toString() {
-        return "ContentContainer{" + "id=" + id + ", displayText=" + displayText + ", resultType=" + resultType + ", displayType=" + displayType + '}';
+        return "ContentContainer{" + "id=" + _id + ", displayText=" + displayText + ", resultType=" + resultType + ", displayType=" + displayType + '}';
     }
 }

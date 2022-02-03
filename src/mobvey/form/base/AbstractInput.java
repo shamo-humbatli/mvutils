@@ -1,55 +1,44 @@
 package mobvey.form.base;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import mobvey.common.KeyValuePair;
-import mobvey.common.Strings;
+import mobvey.condition.AbstractCondition;
 import mobvey.form.answer.content.container.ContentContainer;
-import mobvey.form.answer.content.operation.AbstractOperation;
 import mobvey.form.enums.ColumnDefinitionType;
-import mobvey.form.enums.InputTypes;
-import mobvey.form.enums.InputValueTypes;
+import mobvey.form.enums.FormElementType;
+import mobvey.form.enums.InputType;
+import mobvey.form.enums.InputValueType;
+import mobvey.operation.AbstractOperation;
 
 /**
  *
  * @author Shamo Humbatli
  */
-public abstract class AbstractInput implements Serializable {
+public abstract class AbstractInput extends AbstractFormElement {
 
-    protected String id = null;
     protected String columnDefinition = "0";
     protected ColumnDefinitionType columnDefinitionType = ColumnDefinitionType.CI;
     protected boolean columnDefinitionDeclaredByDefault = true;
     protected String contentItemIndex;
-    protected InputValueTypes inputValueType;
-    protected AbstractOperation operation;
-    protected final InputTypes inputType;
+    protected InputValueType inputValueType;
+    protected final InputType inputType;
     protected Object displayContent;
-    protected String parentId = null;
     protected boolean complex = false;
-
-    protected String minValue;
-    protected String maxValue;
-
-    protected List<String> questionsToEnable;
-    protected List<String> questionsToDisable;
-
-    protected List<String> elementsToEnable;
-    protected List<String> elementsToDisable;
 
     protected List<KeyValuePair<String, Boolean>> containersRequired;
 
     protected List<ContentContainer> contentContainers;
 
-    protected String returnContent = null;
+    protected Object returnContent = null;
+    
+    protected List<AbstractCondition> _validations;
+    
+    protected AbstractOperation _valueOperation;
 
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
+    public AbstractInput(InputType inputType, FormElementType elementType) {
+        super(elementType);
+        this.inputType = inputType;
     }
 
     public boolean isComplex() {
@@ -59,15 +48,7 @@ public abstract class AbstractInput implements Serializable {
     public void setComplex(boolean complex) {
         this.complex = complex;
     }
-
-    public String getParentId() {
-        return parentId;
-    }
-
-    public void setParentId(String parentId) {
-        this.parentId = parentId;
-    }
-
+    
     public Object getDisplayContent() {
         return displayContent;
     }
@@ -76,27 +57,15 @@ public abstract class AbstractInput implements Serializable {
         this.displayContent = displayContent;
     }
 
-    public AbstractInput(InputTypes inputType) {
-        this.inputType = inputType;
-    }
-
-    public InputTypes getInputType() {
+    public InputType getInputType() {
         return inputType;
     }
 
-    public AbstractOperation getOperation() {
-        return operation;
-    }
-
-    public void setOperation(AbstractOperation operation) {
-        this.operation = operation;
-    }
-
-    public InputValueTypes getInputValueType() {
+    public InputValueType getInputValueType() {
         return inputValueType;
     }
 
-    public void setInputValueType(InputValueTypes inputValueType) {
+    public void setInputValueType(InputValueType inputValueType) {
         this.inputValueType = inputValueType;
     }
 
@@ -108,104 +77,33 @@ public abstract class AbstractInput implements Serializable {
         this.contentItemIndex = contentItemIndex;
     }
 
-    public String getReturnContent() {
+    public Object getReturnContent() {
         return returnContent;
     }
+    
+     public String getStringReturnContent() {
+        return returnContent == null ? null : String.valueOf(returnContent);
+    }
 
-    public void setReturnContent(String returnContent) {
+    public void setReturnContent(Object returnContent) {
         this.returnContent = returnContent;
     }
 
-
-    public void AddElementToEnable(String itemId) {
-        if (elementsToEnable == null) {
-            elementsToEnable = new ArrayList<>();
-        }
-
-        if (Strings.isNothing(itemId)) {
-            return;
-        }
-
-        elementsToEnable.add(itemId);
-    }
-
-    public List<String> getElementsToEnable() {
-        return elementsToEnable;
-    }
-
-    public void setElementsToEnable(List<String> elementsToEnable) {
-        this.elementsToEnable = elementsToEnable;
-    }
-
-    public List<String> getElementsToDisable() {
-        return elementsToDisable;
-    }
-
-    public void setElementsToDisable(List<String> elementsToDisable) {
-        this.elementsToDisable = elementsToDisable;
-    }
-
-    public void AddElementToDisable(String itemId) {
-        if (elementsToDisable == null) {
-            elementsToDisable = new ArrayList<>();
-        }
-
-        if (Strings.isNothing(itemId)) {
-            return;
-        }
-
-        elementsToDisable.add(itemId);
-    }
-
-    public void AddQuestionToEnable(String questionId) {
-        if (questionsToEnable == null) {
-            questionsToEnable = new ArrayList<>();
-        }
-
-        if ("".equals(questionId)) {
-            return;
-        }
-
-        questionsToEnable.add(questionId);
-    }
-
-    public List<String> getQuestionsToEnable() {
-        return questionsToEnable;
-    }
-
-    public void setQuestionsToEnable(List<String> questionsToEnable) {
-        this.questionsToEnable = questionsToEnable;
-    }
-
-    public List<String> getQuestionsToDisable() {
-        return questionsToDisable;
-    }
-
-    public void setQuestionsToDisable(List<String> questionsToDisable) {
-        this.questionsToDisable = questionsToDisable;
-    }
-
-    public void AddQuestionToDisable(String questionId) {
-        if (questionsToDisable == null) {
-            questionsToDisable = new ArrayList<>();
-        }
-
-        if ("".equals(questionId)) {
-            return;
-        }
-
-        questionsToDisable.add(questionId);
-    }
-
-    public boolean HasOperation() {
-        return operation != null;
-    }
-
     public List<ContentContainer> getContentContainers() {
+
+        if (contentContainers == null) {
+            contentContainers = new ArrayList<ContentContainer>();
+        }
+
         return contentContainers;
     }
 
     public void setContentContainers(List<ContentContainer> contentContainers) {
+        
+        if(contentContainers == null)
+            return;
+        
+        setParent(contentContainers, this);
         this.contentContainers = contentContainers;
     }
 
@@ -213,6 +111,11 @@ public abstract class AbstractInput implements Serializable {
         if (contentContainers == null) {
             contentContainers = new ArrayList<>();
         }
+        
+        if(contentContainer == null)
+            return;
+        
+        contentContainer.setParent(this);
 
         contentContainers.add(contentContainer);
     }
@@ -235,6 +138,16 @@ public abstract class AbstractInput implements Serializable {
 
     public boolean HasContainersToReviewIfRequired() {
         return containersRequired != null && containersRequired.size() > 0;
+    }
+    
+    public boolean hasValueOperation()
+    {
+        return _valueOperation != null;
+    }
+    
+    public boolean hasValidations()
+    {
+        return _validations != null && !_validations.isEmpty();
     }
 
     public String getColumnDefinition() {
@@ -261,26 +174,34 @@ public abstract class AbstractInput implements Serializable {
         this.columnDefinitionDeclaredByDefault = columnDefinitionDeclaredByDefault;
     }
 
-    public String getMinValue() {
-        return minValue;
+    public List<AbstractCondition> getValidations() {
+        return _validations;
     }
 
-    public void setMinValue(String minValue) {
-        this.minValue = minValue;
+    public void setValidations(List<AbstractCondition> _validations) {
+        this._validations = _validations;
     }
 
-    public String getMaxValue() {
-        return maxValue;
+     public void AddValidation(AbstractCondition abstractCondition) {
+        if (_validations == null) {
+            _validations = new ArrayList<>();
+        }
+
+        _validations.add(abstractCondition);
     }
 
-    public void setMaxValue(String maxValue) {
-        this.maxValue = maxValue;
+    public AbstractOperation getValueOperation() {
+        return _valueOperation;
     }
 
-    public abstract AbstractInput CloneExact();
-
+    public void setValueOperation(AbstractOperation valueOperation) {
+        this._valueOperation = valueOperation;
+    }
+    
+    public abstract boolean isIndividuallyReturnable();
+     
     @Override
     public String toString() {
-        return "AbstractInput{" + "id=" + id + ", columnDefinition=" + columnDefinition + ", columnDefinitionType=" + columnDefinitionType + ", columnDefinitionDeclaredByDefault=" + columnDefinitionDeclaredByDefault + ", contentItemIndex=" + contentItemIndex + ", inputValueType=" + inputValueType + ", operation=" + operation + ", inputType=" + inputType + ", displayContent=" + displayContent + ", parentId=" + parentId + ", complex=" + complex + ", questionsToEnable=" + questionsToEnable + ", questionsToDisable=" + questionsToDisable + ", containersRequired=" + containersRequired + ", returnContent=" + returnContent + '}';
+        return "AbstractInput{" + "id=" + _id + ", columnDefinition=" + columnDefinition + ", columnDefinitionType=" + columnDefinitionType + ", columnDefinitionDeclaredByDefault=" + columnDefinitionDeclaredByDefault + ", contentItemIndex=" + contentItemIndex + ", inputValueType=" + inputValueType + ", inputType=" + inputType + ", displayContent=" + displayContent + ", parentId=" + getParentId() + ", complex=" + complex  + ", containersRequired=" + containersRequired + ", returnContent=" + returnContent + '}';
     }
 }
