@@ -21,6 +21,7 @@ public class QuestionForm extends AbstractFormElement {
     protected String _version;
     protected String _description;
     protected String _title;
+    protected String _actualShortDescription;
 
     public String getDescription() {
         return _description;
@@ -46,7 +47,7 @@ public class QuestionForm extends AbstractFormElement {
         this._version = formVersion;
     }
 
-    public void AddQuestion(Question question) {
+    public void addQuestion(Question question) {
         if (_questions == null) {
             _questions = new ArrayList<>();
         }
@@ -76,6 +77,14 @@ public class QuestionForm extends AbstractFormElement {
         return true;
     }
 
+    public String getActualShortDescription() {
+        return _actualShortDescription;
+    }
+
+    public void setActualShortDescription(String actualShortDescription) {
+        this._actualShortDescription = actualShortDescription;
+    }
+    
     public String getTitle() {
         return _title;
     }
@@ -90,6 +99,7 @@ public class QuestionForm extends AbstractFormElement {
         QuestionForm qf = new QuestionForm();
 
         qf.setDescription(getDescription());
+        qf.setActualShortDescription(getActualShortDescription());
         qf.setId(getId());
         qf.setLanguage(getLanguage());
         qf.setVersion(getVersion());
@@ -103,7 +113,7 @@ public class QuestionForm extends AbstractFormElement {
                 }
 
                 Question qCloned = q.CloneExact();
-                qf.AddQuestion(qCloned);
+                qf.addQuestion(qCloned);
             }
         }
 

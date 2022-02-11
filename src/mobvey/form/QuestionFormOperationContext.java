@@ -8,8 +8,12 @@ import java.util.Map;
 import mobvey.common.NumberUtil;
 import mobvey.common.Strings;
 import mobvey.condition.AbstractCondition;
+import mobvey.condition.CompareInputValueWithDirectValueCondition;
+import mobvey.condition.CompareInputValueWithInputValueCondition;
 import mobvey.condition.CompareWithDirectValueCondition;
 import mobvey.condition.CompareWithInputValueCondition;
+import mobvey.condition.HasContentOfInputsCondition;
+import mobvey.condition.HasNoContentOfInputsCondition;
 import mobvey.condition.IsInRangeOfDirectValuesCondition;
 import mobvey.condition.IsInRangeOfInputValuesCondition;
 import mobvey.form.answer.SimpleAnswer;
@@ -59,6 +63,7 @@ public class QuestionFormOperationContext implements IQuestionFormOperation {
 
         _elements = new HashMap<String, AbstractFormElement>();
 
+        _elements.put(_questionForm.getId(), _questionForm);
         loadQuestions();
 
         _elementCount = _elements.size();
@@ -123,6 +128,35 @@ public class QuestionFormOperationContext implements IQuestionFormOperation {
     }
 
     @Override
+    public boolean isEnabledInTree(String elementId) {
+        return getEnabledStateInTree(elementId);
+    }
+
+    @Override
+    public boolean isDisabledInTree(String elementId) {
+        return !getEnabledStateInTree(elementId);
+    }
+
+    @Override
+    public boolean getEnabledStateInTree(String elementId) {
+        AbstractFormElement afe = getElementById(elementId);
+
+        if (afe == null) {
+            return false;
+        }
+
+        if (!afe.isEnabled()) {
+            return false;
+        }
+
+        if (Strings.isNullOrEmpty(afe.getParentId())) {
+            return afe.isEnabled();
+        }
+
+        return getEnabledStateInTree(afe.getParentId());
+    }
+
+    @Override
     public boolean isAnyParentDisabled(String elementId) {
 
         if (Strings.isNothing(elementId)) {
@@ -168,6 +202,37 @@ public class QuestionFormOperationContext implements IQuestionFormOperation {
     }
 
     @Override
+    public String getActualShortDescription() {
+        String asdStr = _questionForm.getActualShortDescription();
+
+        if (Strings.isNullOrEmpty(asdStr)) {
+            return null;
+        }
+
+        for (String inputId : Strings.getParams(asdStr, '{', '}')) {
+            Collection<AbstractInput> ainputs = getReturnableInputs(inputId);
+
+            Collection<String> valuesMapped = new ArrayList<>();
+
+            for (AbstractInput ai : ainputs) {
+                String hrText = ai.getHrDisplayText();
+
+                if (Strings.isNothing(hrText)) {
+                    continue;
+                }
+
+                valuesMapped.add(hrText);
+            }
+
+            if (!valuesMapped.isEmpty()) {
+                asdStr = asdStr.replace("{" + inputId + "}", Strings.join(", ", valuesMapped));
+            }
+        }
+
+        return asdStr;
+    }
+
+    @Override
     public Collection<String> setReturnRequired(String contentContainerId, boolean required) {
         AbstractFormElement element = getElementById(contentContainerId);
 
@@ -189,7 +254,7 @@ public class QuestionFormOperationContext implements IQuestionFormOperation {
     @Override
     public Collection<String> setReturnValue(String inputId, Object value) {
         List<String> changes = new ArrayList<>();
-        AbstractInput ai = getFormElement(inputId, AbstractInput.class);
+        AbstractInput ai = getElement(inputId, AbstractInput.class);
 
         if (ai == null) {
             return changes;
@@ -242,15 +307,11 @@ public class QuestionFormOperationContext implements IQuestionFormOperation {
     @Override
     public Collection<String> setChecked(String inputOptionId, boolean checked) {
 
-        if (inputOptionId.equals("inputOptionId")) {
-            int x = 5;
-        }
-
         Collection<String> changes = new ArrayList<>();
 
-        InputOptionContent ioc = getFormElement(inputOptionId, InputOptionContent.class);
+        InputOptionContent ioc = getElement(inputOptionId, InputOptionContent.class);
 
-        if (ioc == null) {
+        if (ioc == null || (ioc.isChecked() == checked)) {
             return changes;
         }
 
@@ -263,7 +324,7 @@ public class QuestionFormOperationContext implements IQuestionFormOperation {
             return changes;
         }
 
-        ContentContainer parentContainer = getFormElement(ioc.getParentId(), ContentContainer.class);
+        ContentContainer parentContainer = getElement(ioc.getParentId(), ContentContainer.class);
 
         if (parentContainer != null) {
             switch (parentContainer.getResultType()) {
@@ -290,6 +351,11 @@ public class QuestionFormOperationContext implements IQuestionFormOperation {
                                 }
 
                                 InputOptionContent iocOther = (InputOptionContent) ai;
+
+                                if (iocOther.isChecked() == false) {
+                                    continue;
+                                }
+
                                 iocOther.setChecked(false);
                                 changes.add(ai.getId());
                             }
@@ -318,7 +384,7 @@ public class QuestionFormOperationContext implements IQuestionFormOperation {
 
         AbstractFormElement afe = getElementById(elementId);
 
-        if (afe == null) {
+        if (afe == null || (afe.isEnabled() == enabled)) {
             return changes;
         }
 
@@ -344,7 +410,7 @@ public class QuestionFormOperationContext implements IQuestionFormOperation {
 
     @Override
     public InputValidationResult validateInput(String inputTextId) {
-        return validateInput(getFormElement(inputTextId, AbstractInput.class));
+        return validateInput(getElement(inputTextId, AbstractInput.class));
     }
 
     @Override
@@ -359,6 +425,8 @@ public class QuestionFormOperationContext implements IQuestionFormOperation {
         if (Strings.isNothing(id)) {
             return null;
         }
+
+        id = id.trim();
 
         return _elements.get(id);
     }
@@ -441,60 +509,67 @@ public class QuestionFormOperationContext implements IQuestionFormOperation {
 
         return getReturnableInputs(afe);
     }
+    
+     @Override
+    public boolean hasAnyReturnableInputs(String elementId) {
+        AbstractFormElement afe = getElementById(elementId);
+
+        return hasAnyReturnableInput(afe);
+    }
 
     @Override
     public ContentContainer getContentContainerById(String id) {
-        return getFormElement(id, ContentContainer.class);
+        return getElement(id, ContentContainer.class);
     }
 
     @Override
     public InputTextContent getInputTextById(String id) {
-        return getFormElement(id, InputTextContent.class);
+        return getElement(id, InputTextContent.class);
     }
 
     @Override
     public InputOptionContent getInputOptionById(String id) {
-        return getFormElement(id, InputOptionContent.class);
+        return getElement(id, InputOptionContent.class);
     }
 
     @Override
     public SimpleAnswer getAnswerById(String id) {
-        return getFormElement(id, SimpleAnswer.class);
+        return getElement(id, SimpleAnswer.class);
     }
 
     @Override
     public Question getQuestionById(String id) {
-        return getFormElement(id, Question.class);
+        return getElement(id, Question.class);
     }
 
     @Override
     public Collection<AbstractInput> getInputContents() {
-        return getFormElements(AbstractInput.class);
+        return getElements(AbstractInput.class);
     }
 
     @Override
     public Collection<InputTextContent> getInputTextContents() {
-        return getFormElements(InputTextContent.class);
+        return getElements(InputTextContent.class);
     }
 
     @Override
     public Collection<InputOptionContent> getInputOptionContents() {
-        return getFormElements(InputOptionContent.class);
+        return getElements(InputOptionContent.class);
     }
 
     @Override
     public Collection<ContentContainer> getContentContainers() {
-        return getFormElements(ContentContainer.class);
+        return getElements(ContentContainer.class);
     }
 
     @Override
     public Collection<Question> getQuestions() {
-        return getFormElements(Question.class);
+        return getElements(Question.class);
     }
 
     @Override
     public Collection<AbstractAnswer> getAnswers() {
-        return getFormElements(AbstractAnswer.class);
+        return getElements(AbstractAnswer.class);
     }
 
     @Override
@@ -510,7 +585,7 @@ public class QuestionFormOperationContext implements IQuestionFormOperation {
     public Collection<AbstractInput> getInputsHavingValidations() {
         Collection<AbstractInput> inputs = new ArrayList<>();
 
-        Collection<AbstractInput> allInputs = getFormElements(AbstractInput.class);
+        Collection<AbstractInput> allInputs = getElements(AbstractInput.class);
 
         for (AbstractInput ai : allInputs) {
             if (!ai.hasValidations()) {
@@ -527,7 +602,7 @@ public class QuestionFormOperationContext implements IQuestionFormOperation {
     public Collection<AbstractInput> getInputsHavingValueOperation() {
         Collection<AbstractInput> inputs = new ArrayList<>();
 
-        Collection<AbstractInput> allInputs = getFormElements(AbstractInput.class);
+        Collection<AbstractInput> allInputs = getElements(AbstractInput.class);
 
         for (AbstractInput ai : allInputs) {
             if (!ai.hasValueOperation()) {
@@ -552,7 +627,22 @@ public class QuestionFormOperationContext implements IQuestionFormOperation {
     }
 
     @Override
-    public <TElement extends AbstractFormElement> TElement getFormElement(String id,
+    public <TElement extends AbstractFormElement> TElement getParentElementOfType(String id, Class<TElement> elementClass) {
+        AbstractFormElement afeSupposed = getElementById(id);
+
+        if (afeSupposed == null) {
+            return null;
+        }
+
+        if (elementClass.isAssignableFrom(afeSupposed.getClass())) {
+            return elementClass.cast(afeSupposed);
+        }
+
+        return getParentElementOfType(afeSupposed.getParentId(), elementClass);
+    }
+
+    @Override
+    public <TElement extends AbstractFormElement> TElement getElement(String id,
             Class<TElement> elementClass) {
         try {
             AbstractFormElement afe = getElementById(id);
@@ -565,7 +655,7 @@ public class QuestionFormOperationContext implements IQuestionFormOperation {
     }
 
     @Override
-    public <TElement extends AbstractFormElement> Collection<TElement> getFormElements(Class<TElement> elementClass) {
+    public <TElement extends AbstractFormElement> Collection<TElement> getElements(Class<TElement> elementClass) {
         Collection<TElement> elements = new ArrayList<>();
 
         for (AbstractFormElement afe : _elements.values()) {
@@ -687,6 +777,93 @@ public class QuestionFormOperationContext implements IQuestionFormOperation {
         }
 
         return inputs;
+    }
+
+    private boolean hasAnyReturnableInput(AbstractFormElement afe) {
+
+        if (afe == null) {
+            return false;
+        }
+
+        if (afe.isEnabled()) {
+            switch (afe.getElementType()) {
+                case FORM: {
+                    QuestionForm qf = (QuestionForm) afe;
+                    for (Question q : qf.getQuestions()) {
+                        if (q == null || !q.isEnabled()) {
+                            continue;
+                        }
+
+                        if (hasAnyReturnableInput(q)) {
+                            return true;
+                        }
+                    }
+                }
+                break;
+                case QUESTION: {
+                    Question q = (Question) afe;
+                    for (AbstractAnswer aa : q.getAnswers()) {
+                        if (aa == null || !aa.isEnabled()) {
+                            continue;
+                        }
+
+                        if (hasAnyReturnableInput(aa)) {
+                            return true;
+                        }
+                    }
+                }
+                break;
+                case ANSWER: {
+                    AbstractAnswer aa = (AbstractAnswer) afe;
+                    for (ContentContainer cc : aa.getAnswerContentContainers()) {
+                        if (cc == null || !cc.isEnabled()) {
+                            continue;
+                        }
+
+                        if (hasAnyReturnableInput(cc)) {
+                            return true;
+                        }
+                    }
+                }
+                break;
+                case CONTENT_CONTAINER: {
+                    ContentContainer cc = (ContentContainer) afe;
+
+                    for (AbstractInput ai : cc.getContentInputs()) {
+                        if (ai == null) {
+                            continue;
+                        }
+
+                        if (ai.isIndividuallyReturnable()) {
+                            return true;
+                        }
+
+                        if (ai.isComplex()) {
+                            for (ContentContainer subCc : ai.getContentContainers()) {
+                                if (subCc == null || !subCc.isEnabled()) {
+                                    continue;
+                                }
+
+                                if (hasAnyReturnableInput(subCc)) {
+                                    return true;
+                                }
+                            }
+                        }
+                    }
+                }
+                break;
+                case INPUT_TEXT:
+                case INPUT_OPTION: {
+                    AbstractInput ai = (AbstractInput) afe;
+                    return ai.isIndividuallyReturnable();
+                }
+                default:
+                    break;
+
+            }
+        }
+
+        return false;
     }
 
     private Collection<String> runProcedures(Collection<AbstractProcedure> abstractProcedures) {
@@ -929,7 +1106,7 @@ public class QuestionFormOperationContext implements IQuestionFormOperation {
     }
 
     private Object getInputReturnValue(String inputId) {
-        AbstractInput ai = getFormElement(inputId, AbstractInput.class);
+        AbstractInput ai = getElement(inputId, AbstractInput.class);
 
         if (ai == null) {
             return null;
@@ -971,40 +1148,130 @@ public class QuestionFormOperationContext implements IQuestionFormOperation {
             return true;
         }
 
-        if (value == null) {
+        try {
+            switch (abstractCondition.getConditionType()) {
+                case COMPARE_WITH_DV: {
+
+                    if (value == null || Strings.isNullOrEmpty(value.toString())) {
+                        return true;
+                    }
+                    Double doubleValue = Double.valueOf(value.toString());
+
+                    CompareWithDirectValueCondition condition = (CompareWithDirectValueCondition) abstractCondition;
+                    Double valueToCompare = condition.getCompareWith();
+                    return isComparisonSatisfied(doubleValue, valueToCompare, condition.getComparisonType());
+                }
+                case COMPARE_WITH_IV: {
+
+                    if (value == null || Strings.isNullOrEmpty(value.toString())) {
+                        return true;
+                    }
+                    Double doubleValue = Double.valueOf(value.toString());
+
+                    CompareWithInputValueCondition condition = (CompareWithInputValueCondition) abstractCondition;
+                    String inputId = condition.getCompareWith();
+                    Object valueToCompare = getInputReturnValue(inputId);
+                    return isComparisonSatisfied(doubleValue, NumberUtil.getAsDouble(valueToCompare), condition.getComparisonType());
+                }
+                case IS_IN_RANGE_DVS: {
+                    if (value == null || Strings.isNullOrEmpty(value.toString())) {
+                        return true;
+                    }
+                    Double doubleValue = Double.valueOf(value.toString());
+
+                    IsInRangeOfDirectValuesCondition condition = (IsInRangeOfDirectValuesCondition) abstractCondition;
+                    return NumberUtil.isInRange(doubleValue, condition.getMinValue(), condition.getMaxValue());
+                }
+                case IS_IN_RANGE_IVS: {
+                    if (value == null || Strings.isNullOrEmpty(value.toString())) {
+                        return true;
+                    }
+                    Double doubleValue = Double.valueOf(value.toString());
+
+                    IsInRangeOfInputValuesCondition condition = (IsInRangeOfInputValuesCondition) abstractCondition;
+                    Object valueMinToCompare = getInputReturnValue(condition.getMinValueInputId());
+                    Object valueMaxToCompare = getInputReturnValue(condition.getMaxValueInputId());
+
+                    Double minValue = NumberUtil.getAsDouble(valueMinToCompare);
+                    Double maxValue = NumberUtil.getAsDouble(valueMaxToCompare);
+
+                    return NumberUtil.isInRange(doubleValue, minValue, maxValue);
+                }
+                case COMPARE_IV_DV: {
+                    CompareInputValueWithDirectValueCondition condition = (CompareInputValueWithDirectValueCondition) abstractCondition;
+                    Object comparingObj = getInputReturnValue(condition.getComparingInputId());
+
+                    Double comparingValue = NumberUtil.getAsDouble(comparingObj);
+
+                    return isComparisonSatisfied(comparingValue, condition.getCompareWith(), condition.getComparisonType());
+                }
+                case COMPARE_IV_IV: {
+                    CompareInputValueWithInputValueCondition condition = (CompareInputValueWithInputValueCondition) abstractCondition;
+                    Object comparingObj1 = getInputReturnValue(condition.getComparingInputId());
+                    Object comparingObj2 = getInputReturnValue(condition.getCompareWithInputId());
+
+                    Double comparingValue1 = NumberUtil.getAsDouble(comparingObj1);
+                    Double comparingValue2 = NumberUtil.getAsDouble(comparingObj2);
+
+                    return isComparisonSatisfied(comparingValue1, comparingValue2, condition.getComparisonType());
+                }
+                case HAS_CONTENT:
+                    return value != null && !Strings.isNullOrEmpty(value.toString());
+                case HAS_NO_CONTENT:
+                    return value == null || Strings.isNullOrEmpty(value.toString());
+                case HAS_CONTENT_IVS: {
+                    HasContentOfInputsCondition condition = (HasContentOfInputsCondition) abstractCondition;
+
+                    Collection<String> inputIds = condition.getInputIds();
+
+                    if (inputIds == null || inputIds.isEmpty()) {
+                        return true;
+                    }
+
+                    for (String inputId : inputIds) {
+                        AbstractInput input = getElement(inputId, AbstractInput.class);
+
+                        if (input == null) {
+                            continue;
+                        }
+
+                        if (Strings.hasNoContent(input.getStringReturnContent())) {
+                            return false;
+                        }
+                    }
+
+                }
+                break;
+                case HAS_NO_CONTENT_IVS: {
+                    HasNoContentOfInputsCondition condition = (HasNoContentOfInputsCondition) abstractCondition;
+
+                    Collection<String> inputIds = condition.getInputIds();
+
+                    if (inputIds == null || inputIds.isEmpty()) {
+                        return true;
+                    }
+
+                    for (String inputId : inputIds) {
+                        AbstractInput input = getElement(inputId, AbstractInput.class);
+
+                        if (input == null) {
+                            continue;
+                        }
+
+                        if (Strings.hasContent(input.getStringReturnContent())) {
+                            return false;
+                        }
+                    }
+                }
+                break;
+                default:
+                    return false;
+            }
+
             return true;
-        }
-
-        Double doubleValue = Double.valueOf(value.toString());
-
-        switch (abstractCondition.getConditionType()) {
-            case COMPARE_WITH_DV: {
-                CompareWithDirectValueCondition cwdvc = (CompareWithDirectValueCondition) abstractCondition;
-                Double valueToCompare = cwdvc.getCompareWith();
-                return isComparisonSatisfied(doubleValue, valueToCompare, cwdvc.getComparisonType());
-            }
-            case COMPARE_WITH_IV: {
-                CompareWithInputValueCondition cwivc = (CompareWithInputValueCondition) abstractCondition;
-                String inputId = cwivc.getCompareWith();
-                Object valueToCompare = getInputReturnValue(inputId);
-                return isComparisonSatisfied(doubleValue, NumberUtil.getAsDouble(valueToCompare), cwivc.getComparisonType());
-            }
-            case IS_IN_RANGE_DVS: {
-                IsInRangeOfDirectValuesCondition iirodvo = (IsInRangeOfDirectValuesCondition) abstractCondition;
-                return doubleValue >= iirodvo.getMinValue() && doubleValue <= iirodvo.getMaxValue();
-            }
-            case IS_IN_RANGE_IVS: {
-                IsInRangeOfInputValuesCondition iiroivo = (IsInRangeOfInputValuesCondition) abstractCondition;
-                Object valueMinToCompare = getInputReturnValue(iiroivo.getMinValueInputId());
-                Object valueMaxToCompare = getInputReturnValue(iiroivo.getMaxValueInputId());
-
-                Double minValue = NumberUtil.getAsDouble(valueMinToCompare);
-                Double maxValue = NumberUtil.getAsDouble(valueMaxToCompare);
-
-                return NumberUtil.isInRange(doubleValue, minValue, maxValue);
-            }
-            default:
-                return false;
+        } catch (Exception exp) {
+            //ignored
+            return false;
         }
     }
 }

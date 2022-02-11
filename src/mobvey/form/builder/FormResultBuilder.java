@@ -116,7 +116,7 @@ public class FormResultBuilder {
                     
                     inputValues.add(ir.getColumnDescription() + resultValueCombiner + ir.getReturnValue());
                 }
-                questionElement.setTextContent(Strings.Join(resultValueDelimeter, inputValues));
+                questionElement.setTextContent(Strings.join(resultValueDelimeter, inputValues));
             }
             
             rootDocument.normalize();

@@ -78,11 +78,11 @@ public class QuestionFormTest {
         printStr("change success: " + boolCheck);
 
         int requiredCcCount = qfoc.getRequiredContainers().size();
-        int questionsCount = qfoc.getFormElements(Question.class).size();
-        int onlyInputsCount = qfoc.getFormElements(AbstractInput.class).size();
-        int onlyInputTextCount = qfoc.getFormElements(InputTextContent.class).size();
-        int onlyInputOptionCount = qfoc.getFormElements(InputOptionContent.class).size();
-        int containerCount = qfoc.getFormElements(ContentContainer.class).size();
+        int questionsCount = qfoc.getElements(Question.class).size();
+        int onlyInputsCount = qfoc.getElements(AbstractInput.class).size();
+        int onlyInputTextCount = qfoc.getElements(InputTextContent.class).size();
+        int onlyInputOptionCount = qfoc.getElements(InputOptionContent.class).size();
+        int containerCount = qfoc.getElements(ContentContainer.class).size();
 
         printStr("requiredCcCount: " + requiredCcCount);
         printStr("questionsCount: " + questionsCount);
@@ -119,7 +119,9 @@ public class QuestionFormTest {
                     break;
             }
 
-            boolCheck = voAi.getReturnContent().equals(Double.valueOf(checkVal));
+            Double dblVal1 = Double.valueOf(checkVal);
+            Object retCont = voAi.getReturnContent();
+            boolCheck = retCont.equals(dblVal1);
 
             printStr("val op success: " + boolCheck);
         }
@@ -151,24 +153,34 @@ public class QuestionFormTest {
         }
 
         FormResult ft = qfoc.getFormResult();
-        
+
         AbstractFormElement afeTestOption = qfoc.getElementById("test1");
 
+        AbstractFormElement randomElement = null;
         Random random = new Random();
         for (AbstractInput abstractInput : qfoc.getInputTextContents()) {
             Double randomDbl = (random.nextDouble() + 1) * 10;
             qfoc.setReturnValue(abstractInput.getId(), randomDbl);
+
+            if (randomElement == null) {
+                randomElement = abstractInput;
+            }
         }
 
         for (InputOptionContent ioc : qfoc.getInputOptionContents()) {
-            
-            if(ioc.getId().equals("test1"))
-            {
+
+            if (ioc.getId().equals("test1")) {
                 int x = 6;
             }
-            
-            qfoc.setChecked(ioc.getId(), true);
+
+            Collection<String> chckChanges = qfoc.setChecked(ioc.getId(), true);
+            int x = 6;
         }
+
+        printStr("-----------------------------------");
+        AbstractFormElement afeParentOfRandom = qfoc.getParentElementOfType(randomElement.getId(), Question.class);
+        printStr("Found parent element: " + afeParentOfRandom.toString());
+        printStr("-----------------------------------");
 
         Collection<InputValidationResult> validationResults = qfoc.validateInputs();
 
@@ -189,6 +201,13 @@ public class QuestionFormTest {
                 printStr(ir.toString());
             }
         }
+
+        printStr("-----------------------------------");
+
+        qfoc.setReturnValue("anket_i1", 1);
+        qfoc.setReturnValue("resp_i1", 2);
+        
+        printStr("Actual Desc: " + qfoc.getActualShortDescription());
 
         printStr("-----------------------------------");
     }

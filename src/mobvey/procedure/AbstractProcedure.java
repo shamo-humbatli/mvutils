@@ -1,12 +1,13 @@
 package mobvey.procedure;
 
+import java.io.Serializable;
 import mobvey.form.enums.EventProcedureType;
 
 /**
  *
  * @author ShamoHumbatli
  */
-public class AbstractProcedure {
+public class AbstractProcedure implements Serializable {
    private final EventProcedureType _procedureType;
 
     public AbstractProcedure(EventProcedureType _procedureType) {

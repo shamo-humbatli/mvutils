@@ -62,14 +62,20 @@ public class Question extends AbstractFormElement {
     
     public void setAnswers(List<AbstractAnswer> answers) {
         this.answers = answers;
+        setParent(answers, this);
     }
     
     public void AddAnswer(AbstractAnswer answer) {
+        
+        if(answer == null)
+            return;
+        
         if (answers == null) {
             answers = new ArrayList<>();
         }
         
         answers.add(answer);
+        answer.setParent(this);
     }
     
     public String getItemIndex() {

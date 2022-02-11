@@ -62,7 +62,7 @@ public abstract class AbstractFormElement implements Serializable {
             }
 
             for (AbstractProcedure ap : aps) {
-                if (ap.getProcedureType() == ept) {
+                if (ap.getProcedureType().equals(ept)) {
                     return true;
                 }
             }

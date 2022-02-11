@@ -1,6 +1,7 @@
 package mobvey.form.base;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import mobvey.common.KeyValuePair;
 import mobvey.condition.AbstractCondition;
@@ -31,9 +32,9 @@ public abstract class AbstractInput extends AbstractFormElement {
     protected List<ContentContainer> contentContainers;
 
     protected Object returnContent = null;
-    
+
     protected List<AbstractCondition> _validations;
-    
+
     protected AbstractOperation _valueOperation;
 
     public AbstractInput(InputType inputType, FormElementType elementType) {
@@ -48,7 +49,7 @@ public abstract class AbstractInput extends AbstractFormElement {
     public void setComplex(boolean complex) {
         this.complex = complex;
     }
-    
+
     public Object getDisplayContent() {
         return displayContent;
     }
@@ -80,8 +81,8 @@ public abstract class AbstractInput extends AbstractFormElement {
     public Object getReturnContent() {
         return returnContent;
     }
-    
-     public String getStringReturnContent() {
+
+    public String getStringReturnContent() {
         return returnContent == null ? null : String.valueOf(returnContent);
     }
 
@@ -99,10 +100,11 @@ public abstract class AbstractInput extends AbstractFormElement {
     }
 
     public void setContentContainers(List<ContentContainer> contentContainers) {
-        
-        if(contentContainers == null)
+
+        if (contentContainers == null) {
             return;
-        
+        }
+
         setParent(contentContainers, this);
         this.contentContainers = contentContainers;
     }
@@ -111,10 +113,11 @@ public abstract class AbstractInput extends AbstractFormElement {
         if (contentContainers == null) {
             contentContainers = new ArrayList<>();
         }
-        
-        if(contentContainer == null)
+
+        if (contentContainer == null) {
             return;
-        
+        }
+
         contentContainer.setParent(this);
 
         contentContainers.add(contentContainer);
@@ -139,14 +142,12 @@ public abstract class AbstractInput extends AbstractFormElement {
     public boolean HasContainersToReviewIfRequired() {
         return containersRequired != null && containersRequired.size() > 0;
     }
-    
-    public boolean hasValueOperation()
-    {
+
+    public boolean hasValueOperation() {
         return _valueOperation != null;
     }
-    
-    public boolean hasValidations()
-    {
+
+    public boolean hasValidations() {
         return _validations != null && !_validations.isEmpty();
     }
 
@@ -182,12 +183,20 @@ public abstract class AbstractInput extends AbstractFormElement {
         this._validations = _validations;
     }
 
-     public void AddValidation(AbstractCondition abstractCondition) {
+    public void addValidation(AbstractCondition abstractCondition) {
         if (_validations == null) {
             _validations = new ArrayList<>();
         }
 
         _validations.add(abstractCondition);
+    }
+    
+     public void addValidations(Collection<? extends AbstractCondition> validations) {
+        if (validations == null) {
+            return;
+        }
+
+        getValidations().addAll(validations);
     }
 
     public AbstractOperation getValueOperation() {
@@ -197,11 +206,22 @@ public abstract class AbstractInput extends AbstractFormElement {
     public void setValueOperation(AbstractOperation valueOperation) {
         this._valueOperation = valueOperation;
     }
-    
+
+    public String getHrDisplayText() {
+        switch (inputType) {
+            case TEXT:
+                return returnContent == null ? "" : returnContent.toString();
+            case OPTION:
+                return displayContent.toString();
+            default:
+                return "";
+        }
+    }
+
     public abstract boolean isIndividuallyReturnable();
-     
+
     @Override
     public String toString() {
-        return "AbstractInput{" + "id=" + _id + ", columnDefinition=" + columnDefinition + ", columnDefinitionType=" + columnDefinitionType + ", columnDefinitionDeclaredByDefault=" + columnDefinitionDeclaredByDefault + ", contentItemIndex=" + contentItemIndex + ", inputValueType=" + inputValueType + ", inputType=" + inputType + ", displayContent=" + displayContent + ", parentId=" + getParentId() + ", complex=" + complex  + ", containersRequired=" + containersRequired + ", returnContent=" + returnContent + '}';
+        return "AbstractInput{" + "id=" + _id + ", columnDefinition=" + columnDefinition + ", columnDefinitionType=" + columnDefinitionType + ", columnDefinitionDeclaredByDefault=" + columnDefinitionDeclaredByDefault + ", contentItemIndex=" + contentItemIndex + ", inputValueType=" + inputValueType + ", inputType=" + inputType + ", displayContent=" + displayContent + ", parentId=" + getParentId() + ", complex=" + complex + ", containersRequired=" + containersRequired + ", returnContent=" + returnContent + '}';
     }
 }

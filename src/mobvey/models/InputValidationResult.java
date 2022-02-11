@@ -1,5 +1,6 @@
 package mobvey.models;
 
+import java.io.Serializable;
 import mobvey.condition.AbstractCondition;
 import mobvey.form.base.AbstractInput;
 
@@ -7,7 +8,7 @@ import mobvey.form.base.AbstractInput;
  *
  * @author Shamo Humbatli
  */
-public class InputValidationResult {
+public class InputValidationResult implements Serializable {
     private final AbstractInput _input;
     private final boolean _isValid;
     private final AbstractCondition _condition;

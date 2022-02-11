@@ -29,8 +29,9 @@ public interface IQuestionFormOperation {
     
     //get abstract level
     public AbstractFormElement getElementById(String id);
-    public <TElement extends AbstractFormElement> TElement getFormElement(String id, Class<TElement> elementClass);
-    public <TElement extends AbstractFormElement> Collection<TElement> getFormElements(Class<TElement> elementClass);
+    public <TElement extends AbstractFormElement> TElement getElement(String id, Class<TElement> elementClass);
+    public <TElement extends AbstractFormElement> Collection<TElement> getElements(Class<TElement> elementClass);
+    public <TElement extends AbstractFormElement> TElement getParentElementOfType(String id, Class<TElement> elementClass);
     
 
      //get specified level
@@ -54,16 +55,20 @@ public interface IQuestionFormOperation {
     public Collection<AbstractInput> getInputsHavingValueOperation();   
     public Collection<AbstractInput> getInputsHavingValidations();
     public Collection<AbstractInput> getAvailableInputsHavingValidations();
+    public String getActualShortDescription();
     
     public List<AbstractInput> getReturnableInputs(String elementId);
     public int getFormElementsCount();
     public Map<String, AbstractFormElement> getFormElements();
     public Collection<ContentContainer> getRequiredContainers();
     public Collection<ContentContainer> getUnsatisfiedContainers();
+    public boolean getEnabledStateInTree(String elementId);
     
     public boolean isFormElementsLoaded();
     public boolean isAnyParentDisabled(String elementId);
-   
+    public boolean isEnabledInTree(String elementId);
+    public boolean isDisabledInTree(String elementId);
+    public boolean hasAnyReturnableInputs(String elementId);
   
 
     // validation

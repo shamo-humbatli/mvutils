@@ -37,13 +37,20 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import mobvey.common.Strings;
 import mobvey.condition.AbstractCondition;
+import mobvey.condition.CompareInputValueWithDirectValueCondition;
+import mobvey.condition.CompareInputValueWithInputValueCondition;
 import mobvey.condition.CompareWithDirectValueCondition;
 import mobvey.condition.CompareWithInputValueCondition;
 import mobvey.condition.ConditionType;
+import mobvey.condition.HasContentCondition;
+import mobvey.condition.HasContentOfInputsCondition;
+import mobvey.condition.HasNoContentCondition;
+import mobvey.condition.HasNoContentOfInputsCondition;
 import mobvey.condition.IsInRangeOfDirectValuesCondition;
 import mobvey.condition.IsInRangeOfInputValuesCondition;
 import mobvey.form.enums.EventProcedureType;
 import mobvey.form.enums.FormEventType;
+import mobvey.form.enums.InputType;
 import mobvey.form.events.AbstractFormEvent;
 import mobvey.form.events.FormEvent;
 import mobvey.operation.AbstractOperation;
@@ -116,16 +123,24 @@ public class FormParser {
             for (int elmIndex = 0; elmIndex < nodeList.getLength(); elmIndex++) {
 
                 Node formElm = nodeList.item(elmIndex);
+                String nodeName = formElm.getNodeName();
 
-                if (formElm.getNodeName().equals("description")) {
+                if (nodeName.equals("description")) {
                     qf.setDescription(formElm.getTextContent());
+                    continue;
                 }
 
-                if (formElm.getNodeName().equals("title")) {
+                if (nodeName.equals("actualShortDescription")) {
+                    qf.setActualShortDescription(formElm.getTextContent());
+                    continue;
+                }
+
+                if (nodeName.equals("title")) {
                     qf.setTitle(formElm.getTextContent());
+                    continue;
                 }
 
-                if (!formElm.getNodeName().equals("questions")) {
+                if (!nodeName.equals("questions")) {
                     continue;
                 }
 
@@ -150,15 +165,13 @@ public class FormParser {
                     if (itemIndex == null) {
                         itemIndex = String.valueOf(questionItemIndexCounter);
                         questionItemIndexCounter++;
-                    } else if (itemIndex.toLowerCase().equals("empty")) {
-                        itemIndex = "";
                     }
 
                     Question question = new Question();
                     question.setId(questionId);
                     question.setEnabled(true);
                     question.setItemIndex(itemIndex);
-                    qf.AddQuestion(question);
+                    qf.addQuestion(question);
 
                     if (Strings.hasContent(isForOperatorString)) {
                         question.setIsForOperator(Boolean.valueOf(isForOperatorString));
@@ -266,6 +279,9 @@ public class FormParser {
         String defaultElementsToEnable = GetAttribute(contentContinerNode, "enableElements");
         String defaultElementsToDisable = GetAttribute(contentContinerNode, "disableElements");
 
+        String inputValidations = GetAttribute(contentContinerNode, "inputValidations");
+        String inputEvents = GetAttribute(contentContinerNode, "inputEvents");
+
         String iig = GetAttribute(contentContinerNode, "itemIndexGeneration");
         String rg = GetAttribute(contentContinerNode, "returnGeneration");
 
@@ -319,6 +335,9 @@ public class FormParser {
                 continue;
             }
 
+            boolean hasEnableElements = hasAttribute(inputNode, "enableElements");
+            boolean hasDisableElements = hasAttribute(inputNode, "disableElements");
+
             AbstractInput input = BuildInput(inputNode);
 
             if (input == null) {
@@ -336,37 +355,61 @@ public class FormParser {
                     input.setColumnDefinitionType(ColumnDefinitionType.CN);
                 }
             }
-
-            if (defaultQuestionsToEnable != null
+            String mappedEventType = input.getInputType().equals(InputType.TEXT) ? "changed" : "checked";
+            if (!hasEnableElements && defaultQuestionsToEnable != null
                     && !input.hasAtLeastOneEventByProcedureBy(EventProcedureType.ENABLE_ELEMENTS)) {
 
-                String eventStr = String.format("on:changed; do:enable_elements(%s)", defaultQuestionsToEnable);
+                String eventStr = String.format("on:%s; do:enable_elements(%s); if: has_content", mappedEventType, defaultQuestionsToEnable);
                 List<AbstractFormEvent> events = BuildEvents(eventStr);
                 input.addEvents(events);
+
+                if (input.getInputType().equals(InputType.TEXT)) {
+                    input.addEvents(BuildEvents(String.format("on:%s; do:disable_elements(%s); if: has_no_content", mappedEventType, defaultQuestionsToEnable)));
+                }
             }
 
-            if (defaultQuestionsToDisable != null
+            if (!hasDisableElements && defaultQuestionsToDisable != null
                     && !input.hasAtLeastOneEventByProcedureBy(EventProcedureType.DISABLE_ELEMENTS)) {
 
-                String eventStr = String.format("on:changed; do:disable_elements(%s)", defaultQuestionsToDisable);
+                String eventStr = String.format("on:%s; do:disable_elements(%s); if: has_content", mappedEventType, defaultQuestionsToDisable);
                 List<AbstractFormEvent> events = BuildEvents(eventStr);
                 input.addEvents(events);
+
+                if (input.getInputType().equals(InputType.TEXT)) {
+                    input.addEvents(BuildEvents(String.format("on:%s; do:enable_elements(%s); if: has_no_content", mappedEventType, defaultQuestionsToDisable)));
+                }
             }
 
-            if (defaultElementsToEnable != null
+            if (!hasEnableElements && defaultElementsToEnable != null
                     && !input.hasAtLeastOneEventByProcedureBy(EventProcedureType.ENABLE_ELEMENTS)) {
 
-                String eventStr = String.format("on:changed; do:disable_elements(%s)", defaultElementsToEnable);
+                String eventStr = String.format("on:%s; do:enable_elements(%s); if: has_content", mappedEventType, defaultElementsToEnable);
                 List<AbstractFormEvent> events = BuildEvents(eventStr);
                 input.addEvents(events);
+
+                if (input.getInputType().equals(InputType.TEXT)) {
+                    input.addEvents(BuildEvents(String.format("on:%s; do:disable_elements(%s); if: has_no_content", mappedEventType, defaultElementsToEnable)));
+                }
             }
 
-            if (defaultElementsToDisable != null
+            if (!hasDisableElements && defaultElementsToDisable != null
                     && !input.hasAtLeastOneEventByProcedureBy(EventProcedureType.DISABLE_ELEMENTS)) {
 
-                String eventStr = String.format("on:changed; do:disable_elements(%s)", defaultElementsToDisable);
+                String eventStr = String.format("on:%s; do:disable_elements(%s); if: has_content", mappedEventType, defaultElementsToDisable);
                 List<AbstractFormEvent> events = BuildEvents(eventStr);
                 input.addEvents(events);
+
+                if (input.getInputType().equals(InputType.TEXT)) {
+                    input.addEvents(BuildEvents(String.format("on:%s; do:enable_elements(%s); if: has_no_content", mappedEventType, defaultElementsToDisable)));
+                }
+            }
+
+            if (Strings.hasContent(inputEvents) && input.getEvents().isEmpty()) {
+                input.addEvents(BuildEvents(inputEvents));
+            }
+
+            if (Strings.hasContent(inputValidations) && input.getValidations().isEmpty()) {
+                input.addValidations(BuildConditions(inputValidations));
             }
 
             container.AddContentInput(input);
@@ -401,9 +444,10 @@ public class FormParser {
             }
 
             for (AbstractInput ainput : cc.getContentInputs()) {
-                if (Strings.hasContent(ainput.getContentItemIndex())) {
+                if (ainput.getContentItemIndex() != null) {
                     continue;
                 }
+
                 ainput.setContentItemIndex(String.valueOf(start));
                 start++;
             }
@@ -475,7 +519,6 @@ public class FormParser {
 
         try {
             String inputId = GetAttribute(inputElement, "id");
-            String parentId = GetAttribute(inputElement, "parent");
             String contentType = GetAttribute(inputElement, "type");
 
             String columnDef = GetAttribute(inputElement, "columnDef");
@@ -569,15 +612,15 @@ public class FormParser {
                     if (Strings.hasContent(minValStr) && Strings.hasContent(maxValStr)) {
                         String opStr = String.format("is_in_range_dvs(%s, %s)", minValStr, maxValStr);
                         AbstractCondition cond = BuildCondition(opStr);
-                        textContent.AddValidation(cond);
+                        textContent.addValidation(cond);
                     } else if (Strings.hasContent(minValStr) && Strings.isNothing(maxValStr)) {
                         String opStr = String.format("compare_with_dv(%s, gte)", minValStr);
                         AbstractCondition cond = BuildCondition(opStr);
-                        textContent.AddValidation(cond);
+                        textContent.addValidation(cond);
                     } else if (Strings.hasContent(maxValStr) && Strings.isNothing(minValStr)) {
                         String opStr = String.format("compare_with_dv(%s, lte)", maxValStr);
                         AbstractCondition cond = BuildCondition(opStr);
-                        textContent.AddValidation(cond);
+                        textContent.addValidation(cond);
                     }
 
                     abstractAnswerContent = textContent;
@@ -586,7 +629,6 @@ public class FormParser {
             }
 
             abstractAnswerContent.setId(inputId);
-            abstractAnswerContent.setParentId(parentId);
             abstractAnswerContent.setReturnContent(returnContent);
             abstractAnswerContent.setContentItemIndex(itemIndex);
             abstractAnswerContent.setInputValueType(inputValueType);
@@ -655,41 +697,65 @@ public class FormParser {
                 }
             }
 
-            if (enabledQuestions != null) {
-                String eventStr = String.format("on:changed; do:enable_elements(%s)", enabledQuestions);
+            String mappedEventType = abstractAnswerContent.getInputType().equals(InputType.TEXT) ? "changed" : "checked";
+            if (Strings.hasContent(enabledQuestions)) {
+                String eventStr = String.format("on:%s; do:enable_elements(%s); if: has_content", mappedEventType, enabledQuestions);
                 List<AbstractFormEvent> events = BuildEvents(eventStr);
                 abstractAnswerContent.addEvents(events);
+
+                if (abstractAnswerContent.getInputType().equals(InputType.TEXT)) {
+                    abstractAnswerContent.addEvents(BuildEvents(String.format("on:%s; do:disable_elements(%s); if: has_no_content", mappedEventType, enabledQuestions)));
+                }
             }
 
-            if (disabledQuestions != null) {
-                String eventStr = String.format("on:changed; do:disable_elements(%s)", disabledQuestions);
+            if (Strings.hasContent(disabledQuestions)) {
+                String eventStr = String.format("on:%s; do:disable_elements(%s); if: has_content", mappedEventType, disabledQuestions);
                 List<AbstractFormEvent> events = BuildEvents(eventStr);
                 abstractAnswerContent.addEvents(events);
+
+                if (abstractAnswerContent.getInputType().equals(InputType.TEXT)) {
+                    abstractAnswerContent.addEvents(BuildEvents(String.format("on:%s; do:enable_elements(%s); if: has_no_content", mappedEventType, disabledQuestions)));
+                }
             }
 
             if (Strings.hasContent(enabledItems)) {
-
-                String eventStr = String.format("on:changed; do:enable_elements(%s)", enabledItems);
+                String eventStr = String.format("on:%s; do:enable_elements(%s); if: has_content", mappedEventType, enabledItems);
                 List<AbstractFormEvent> events = BuildEvents(eventStr);
                 abstractAnswerContent.addEvents(events);
+
+                if (abstractAnswerContent.getInputType().equals(InputType.TEXT)) {
+                    abstractAnswerContent.addEvents(BuildEvents(String.format("on:%s; do:disable_elements(%s); if: has_no_content", mappedEventType, enabledItems)));
+                }
             }
 
             if (Strings.hasContent(disabledItems)) {
-                String eventStr = String.format("on:changed; do:disable_elements(%s)", disabledItems);
+                String eventStr = String.format("on:%s; do:disable_elements(%s); if: has_content", mappedEventType, disabledItems);
                 List<AbstractFormEvent> events = BuildEvents(eventStr);
                 abstractAnswerContent.addEvents(events);
+
+                if (abstractAnswerContent.getInputType().equals(InputType.TEXT)) {
+                    abstractAnswerContent.addEvents(BuildEvents(String.format("on:%s; do:enable_elements(%s); if: has_no_content", mappedEventType, disabledItems)));
+                }
             }
 
             if (Strings.hasContent(requiredForReturn)) {
-                String eventStr = String.format("on:changed; do:set_return_required(true, [%s])", requiredForReturn);
+                String eventStr = String.format("on:%s; do:set_return_required(true, [%s]); if: has_content", mappedEventType, requiredForReturn);
                 List<AbstractFormEvent> events = BuildEvents(eventStr);
                 abstractAnswerContent.addEvents(events);
+
+                if (abstractAnswerContent.getInputType().equals(InputType.TEXT)) {
+                    abstractAnswerContent.addEvents(BuildEvents(String.format("on:%s; do:set_return_required(false, [%s]); if: has_no_content", mappedEventType, requiredForReturn)));
+                }
             }
 
             if (Strings.hasContent(notRequiredForReturn)) {
-                String eventStr = String.format("on:changed; do:set_return_required(false, [%s])", notRequiredForReturn);
+                String eventStr = String.format("on:%s; do:set_return_required(false, [%s]); if: has_content", mappedEventType, notRequiredForReturn);
                 List<AbstractFormEvent> events = BuildEvents(eventStr);
                 abstractAnswerContent.addEvents(events);
+
+                if (abstractAnswerContent.getInputType().equals(InputType.TEXT)) {
+                    abstractAnswerContent.addEvents(BuildEvents(String.format("on:%s; do:set_return_required(true, [%s]); if: has_no_content", mappedEventType, notRequiredForReturn)));
+                }
             }
 
             return abstractAnswerContent;
@@ -768,12 +834,14 @@ public class FormParser {
                 String[] paramDo = GetParam("do", eventParams);
                 String[] paramIf = GetParam("if", eventParams);
 
-                if (paramOn == null || paramOn.length != 2) {
+                if (paramDo == null || paramDo.length != 2) {
                     continue;
                 }
 
-                if (paramDo == null || paramDo.length != 2) {
-                    continue;
+                if (paramOn == null || paramOn.length != 2) {
+                    paramOn = new String[2];
+                    paramOn[0] = "on";
+                    paramOn[1] = "changed";
                 }
 
                 String eventTypeStr = paramOn[0].trim().toLowerCase() + "_" + paramOn[1].trim().toLowerCase();
@@ -832,8 +900,8 @@ public class FormParser {
 
             int p11 = procedureStr.indexOf("(");
             int p12 = procedureStr.indexOf(")");
-            String procParamsStr = procedureStr.substring(p11 + 1, p12);
-            String procName = procedureStr.substring(0, p11);
+            String procParamsStr = procedureStr.substring(p11 + 1, p12).trim();
+            String procName = procedureStr.substring(0, p11).trim();
 
             EventProcedureType procType = EventProcedureType.valueOf(procName.toUpperCase());
 
@@ -951,8 +1019,15 @@ public class FormParser {
 
             int p11 = conditionStr.indexOf("(");
             int p12 = conditionStr.indexOf(")");
-            String contentRaw = conditionStr.substring(p11 + 1, p12);
-            String cmd = conditionStr.substring(0, p11);
+            String contentRaw = "";
+            String cmd = "";
+
+            if (p11 >= 0 && p12 >= 0) {
+                contentRaw = conditionStr.substring(p11 + 1, p12).trim();
+                cmd = conditionStr.substring(0, p11).trim();
+            } else {
+                cmd = conditionStr.trim();
+            }
 
             ConditionType opType = ConditionType.valueOf(cmd.toUpperCase());
 
@@ -995,6 +1070,50 @@ public class FormParser {
                     abstractCondition = condition;
                 }
                 break;
+                case COMPARE_IV_DV: {
+                    String[] params = contentRaw.split(",");
+
+                    CompareInputValueWithDirectValueCondition condition = new CompareInputValueWithDirectValueCondition();
+                    condition.setComparingInputId(params[0].trim());
+                    condition.setCompareWith(Double.valueOf(params[1].trim()));
+                    condition.setComparisonType(ComparisonType.valueOf(params[2].trim().toUpperCase()));
+                    abstractCondition = condition;
+                }
+                break;
+                case COMPARE_IV_IV: {
+                    String[] params = contentRaw.split(",");
+
+                    CompareInputValueWithInputValueCondition condition = new CompareInputValueWithInputValueCondition();
+                    condition.setComparingInputId(params[0].trim());
+                    condition.setCompareWithInputId(params[1].trim());
+                    condition.setComparisonType(ComparisonType.valueOf(params[2].trim().toUpperCase()));
+                    abstractCondition = condition;
+                }
+                break;
+                case HAS_CONTENT: {
+                    abstractCondition = new HasContentCondition();
+                }
+                break;
+                case HAS_NO_CONTENT: {
+                    abstractCondition = new HasNoContentCondition();
+                }
+                break;
+                case HAS_CONTENT_IVS: {
+                    String[] params = contentRaw.split(",");
+
+                    HasContentOfInputsCondition condition = new HasContentOfInputsCondition();
+                    condition.setInputIds(Arrays.asList(params));
+                    abstractCondition = condition;
+                }
+                break;
+                case HAS_NO_CONTENT_IVS: {
+                    String[] params = contentRaw.split(",");
+
+                    HasNoContentOfInputsCondition condition = new HasNoContentOfInputsCondition();
+                    condition.setInputIds(Arrays.asList(params));
+                    abstractCondition = condition;
+                }
+                break;
                 default:
                     return null;
 
@@ -1026,7 +1145,7 @@ public class FormParser {
             }
 
             AbstractOperation ao = ai.getValueOperation();
-            
+
             if (ao == null) {
                 continue;
             }
@@ -1046,7 +1165,7 @@ public class FormParser {
 
                 sumInputValsOp.addRangeId(inputs.get(aii).getId());
             }
-            
+
             ai.setValueOperation(sumInputValsOp);
         }
     }
@@ -1210,15 +1329,15 @@ public class FormParser {
             if (nodeName.equals(attrName)) {
                 String attr = attrs.getNamedItem(attrName).getNodeValue().trim();
 
-                if (Strings.isNothing(attr)) {
-                    return null;
-                }
-
-                return attr.trim();
+                return attr;
             }
         }
 
         return null;
+    }
+
+    private boolean hasAttribute(Node node, String attrName) {
+        return GetAttribute(node, attrName) != null;
     }
 
     public Object EvaluateXPathExpression(Document domDocument, String expression) throws XPathExpressionException {
