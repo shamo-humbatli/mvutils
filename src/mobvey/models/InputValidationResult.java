@@ -2,7 +2,7 @@ package mobvey.models;
 
 import java.io.Serializable;
 import mobvey.condition.AbstractCondition;
-import mobvey.form.base.AbstractInput;
+import mobvey.form.elements.AbstractInput;
 
 /**
  *

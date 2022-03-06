@@ -1,7 +1,7 @@
 package test;
 
 import javax.xml.parsers.ParserConfigurationException;
-import mobvey.form.builder.FormResultBuilder;
+import mobvey.form.FormResultBuilder;
 import mobvey.form.enums.ColumnDefinitionType;
 import mobvey.form.result.FormResult;
 import mobvey.form.result.InputResult;

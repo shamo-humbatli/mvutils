@@ -7,5 +7,6 @@ package mobvey.form.enums;
 public enum EventProcedureType {
     ENABLE_ELEMENTS,
     DISABLE_ELEMENTS,
+    ENABLE_ELEMENTS_BY_CLASS,
     SET_RETURN_REQUIRED
 }

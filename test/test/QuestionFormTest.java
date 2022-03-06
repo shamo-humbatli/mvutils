@@ -2,10 +2,10 @@ package test;
 
 import java.io.File;
 import javax.xml.parsers.ParserConfigurationException;
-import mobvey.form.QuestionForm;
+import mobvey.form.elements.QuestionForm;
 import mobvey.form.QuestionFormOperationContext;
-import mobvey.form.base.AbstractInput;
-import mobvey.form.builder.FormResultBuilder;
+import mobvey.form.elements.AbstractInput;
+import mobvey.form.FormResultBuilder;
 import mobvey.form.enums.ColumnDefinitionType;
 import mobvey.form.result.FormResult;
 import mobvey.form.result.InputResult;
@@ -23,18 +23,18 @@ import mobvey.condition.CompareWithDirectValueCondition;
 import mobvey.condition.CompareWithInputValueCondition;
 import mobvey.condition.IsInRangeOfDirectValuesCondition;
 import mobvey.condition.IsInRangeOfInputValuesCondition;
-import mobvey.form.answer.SimpleAnswer;
-import mobvey.form.answer.content.InputOptionContent;
-import mobvey.form.answer.content.InputTextContent;
-import mobvey.form.answer.content.container.ContentContainer;
-import mobvey.form.base.AbstractAnswer;
-import mobvey.form.base.AbstractFormElement;
-import mobvey.form.base.AbstractInput;
+import mobvey.form.elements.SimpleAnswer;
+import mobvey.form.elements.InputOptionContent;
+import mobvey.form.elements.InputTextContent;
+import mobvey.form.elements.ContentContainer;
+import mobvey.form.elements.AbstractAnswer;
+import mobvey.form.elements.AbstractFormElement;
+import mobvey.form.elements.AbstractInput;
 import mobvey.form.enums.ComparisonType;
 import mobvey.form.enums.FormElementType;
 import mobvey.form.events.AbstractFormEvent;
 import mobvey.form.operation.IQuestionFormOperation;
-import mobvey.form.question.Question;
+import mobvey.form.elements.Question;
 import mobvey.form.result.FormResult;
 import mobvey.form.result.InputResult;
 import mobvey.form.result.QuestionResult;
@@ -45,7 +45,7 @@ import mobvey.procedure.AbstractProcedure;
 import mobvey.procedure.DisableElementsProcedure;
 import mobvey.procedure.EnableElementsProcedure;
 import mobvey.procedure.SetReturnRequiredProcedure;
-import mobvey.parser.FormParser;
+import mobvey.form.FormParser;
 
 /**
  *
@@ -62,20 +62,9 @@ public class QuestionFormTest {
         }
 
         FormParser fp = new FormParser(new File(filePath));
-        QuestionForm qf = fp.ParseXml("questions_workforce.xml");
+        QuestionForm qf = fp.parseXml("questions_workforce.xml");
 
         QuestionFormOperationContext qfoc = new QuestionFormOperationContext(qf);
-
-        AbstractInput ai = qf.getQuestions().get(0)
-                .getAnswers().get(0)
-                .getAnswerContentContainers().get(0)
-                .getContentInputs().get(0);
-
-        Collection<String> changes = qfoc.setReturnValue(ai.getId(), "test1");
-        printStr("changes: " + changes.size());
-
-        boolean boolCheck = ai.getReturnContent().equals("test1");
-        printStr("change success: " + boolCheck);
 
         int requiredCcCount = qfoc.getRequiredContainers().size();
         int questionsCount = qfoc.getElements(Question.class).size();
@@ -121,7 +110,7 @@ public class QuestionFormTest {
 
             Double dblVal1 = Double.valueOf(checkVal);
             Object retCont = voAi.getReturnContent();
-            boolCheck = retCont.equals(dblVal1);
+            boolean boolCheck = retCont.equals(dblVal1);
 
             printStr("val op success: " + boolCheck);
         }
@@ -159,6 +148,12 @@ public class QuestionFormTest {
         AbstractFormElement randomElement = null;
         Random random = new Random();
         for (AbstractInput abstractInput : qfoc.getInputTextContents()) {
+            
+            if(abstractInput.getId().equals("a01"))
+            {
+                int x = 6;
+            }
+            
             Double randomDbl = (random.nextDouble() + 1) * 10;
             qfoc.setReturnValue(abstractInput.getId(), randomDbl);
 
@@ -170,6 +165,14 @@ public class QuestionFormTest {
         for (InputOptionContent ioc : qfoc.getInputOptionContents()) {
 
             if (ioc.getId().equals("test1")) {
+                int x = 6;
+            }
+
+            if (ioc.getParentId() == null) {
+                int x = 6;
+            }
+
+            if (ioc.getParentId().equals("b11_c1")) {
                 int x = 6;
             }
 
@@ -206,8 +209,14 @@ public class QuestionFormTest {
 
         qfoc.setReturnValue("anket_i1", 1);
         qfoc.setReturnValue("resp_i1", 2);
-        
+
         printStr("Actual Desc: " + qfoc.getActualShortDescription());
+
+        printStr("-----------------------------------");
+
+        ContentContainer ccWithGenData = qfoc.getElement("b11_c1", ContentContainer.class);
+
+        printStr("ccWithGenData input count: " + ccWithGenData.getContentInputs().size());
 
         printStr("-----------------------------------");
     }

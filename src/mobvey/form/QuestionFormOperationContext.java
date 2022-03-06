@@ -1,5 +1,6 @@
 package mobvey.form;
 
+import mobvey.form.elements.QuestionForm;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -16,26 +17,30 @@ import mobvey.condition.HasContentOfInputsCondition;
 import mobvey.condition.HasNoContentOfInputsCondition;
 import mobvey.condition.IsInRangeOfDirectValuesCondition;
 import mobvey.condition.IsInRangeOfInputValuesCondition;
-import mobvey.form.answer.SimpleAnswer;
-import mobvey.form.answer.content.InputOptionContent;
-import mobvey.form.answer.content.InputTextContent;
-import mobvey.form.answer.content.container.ContentContainer;
-import mobvey.form.base.AbstractAnswer;
-import mobvey.form.base.AbstractFormElement;
-import mobvey.form.base.AbstractInput;
+import mobvey.form.elements.SimpleAnswer;
+import mobvey.form.elements.InputOptionContent;
+import mobvey.form.elements.InputTextContent;
+import mobvey.form.elements.ContentContainer;
+import mobvey.form.elements.AbstractAnswer;
+import mobvey.form.elements.AbstractFormElement;
+import mobvey.form.elements.AbstractInput;
+import mobvey.form.elements.FormBody;
+import mobvey.form.elements.Section;
 import mobvey.form.enums.ComparisonType;
 import mobvey.form.enums.FormElementType;
 import mobvey.form.events.AbstractFormEvent;
 import mobvey.form.operation.IQuestionFormOperation;
-import mobvey.form.question.Question;
+import mobvey.form.elements.Question;
 import mobvey.form.result.FormResult;
 import mobvey.form.result.InputResult;
 import mobvey.form.result.QuestionResult;
 import mobvey.models.InputValidationResult;
 import mobvey.operation.AbstractOperation;
+import mobvey.operation.SumInputValuesByClassesOperation;
 import mobvey.operation.SumInputValuesOperation;
 import mobvey.procedure.AbstractProcedure;
 import mobvey.procedure.DisableElementsProcedure;
+import mobvey.procedure.EnableElementsByClassProcedure;
 import mobvey.procedure.EnableElementsProcedure;
 import mobvey.procedure.SetReturnRequiredProcedure;
 
@@ -47,6 +52,7 @@ public class QuestionFormOperationContext implements IQuestionFormOperation {
 
     private final QuestionForm _questionForm;
     private Map<String, AbstractFormElement> _elements;
+    private Collection<AbstractFormElement> _elementsHavingClasses;
     private int _elementCount = 0;
     private boolean _elementsLoaded = false;
 
@@ -62,23 +68,69 @@ public class QuestionFormOperationContext implements IQuestionFormOperation {
         }
 
         _elements = new HashMap<String, AbstractFormElement>();
+        _elementsHavingClasses = new ArrayList<>();
 
-        _elements.put(_questionForm.getId(), _questionForm);
-        loadQuestions();
+        loadForm();
+
+        for (AbstractFormElement afe : _elements.values()) {
+            if (!afe.hasAnyClass()) {
+                continue;
+            }
+
+            _elementsHavingClasses.add(afe);
+        }
 
         _elementCount = _elements.size();
         _elementsLoaded = true;
     }
 
-    private void loadQuestions() {
-        List<Question> questions = _questionForm.getQuestions();
-        for (Question q : questions) {
-            if (q == null) {
+    private void loadForm() {
+        _elements.put(_questionForm.getId(), _questionForm);
+
+        FormBody fb = _questionForm.getBody();
+
+        if (fb == null) {
+            return;
+        }
+
+        _elements.put(fb.getId(), fb);
+
+        for (AbstractFormElement afe : fb.getChildren()) {
+
+            if (afe == null) {
                 continue;
             }
-            _elements.put(q.getId(), q);
-            loadAnswers(q);
+
+            if (afe instanceof Section) {
+                loadSection((Section) afe);
+            }
         }
+    }
+
+    private void loadSection(Section section) {
+
+        if (section == null) {
+            return;
+        }
+
+        _elements.put(section.getId(), section);
+
+        for (AbstractFormElement afe : section.getChildren()) {
+            if (afe == null) {
+                continue;
+            }
+
+            if (afe.getElementType().equals(FormElementType.QUESTION)) {
+                loadQuestions((Question) afe);
+            }
+        }
+    }
+
+    private void loadQuestions(Question question) {
+
+        _elements.put(question.getId(), question);
+        loadAnswers(question);
+
     }
 
     private void loadAnswers(Question question) {
@@ -224,7 +276,9 @@ public class QuestionFormOperationContext implements IQuestionFormOperation {
                 valuesMapped.add(hrText);
             }
 
-            if (!valuesMapped.isEmpty()) {
+            if (valuesMapped.isEmpty()) {
+                asdStr = asdStr.replace("{" + inputId + "}", "");
+            } else {
                 asdStr = asdStr.replace("{" + inputId + "}", Strings.join(", ", valuesMapped));
             }
         }
@@ -315,65 +369,63 @@ public class QuestionFormOperationContext implements IQuestionFormOperation {
             return changes;
         }
 
-        ioc.setChecked(checked);
+        if (checked) {
+            ContentContainer parentContainer = getElement(ioc.getParentId(), ContentContainer.class);
 
-        changes.add(ioc.getId());
-        changes.addAll(runEvents(ioc));
-
-        if (!checked) {
-            return changes;
-        }
-
-        ContentContainer parentContainer = getElement(ioc.getParentId(), ContentContainer.class);
-
-        if (parentContainer != null) {
-            switch (parentContainer.getResultType()) {
-                case SINGLE: {
-                    for (AbstractInput ai : parentContainer.getContentInputs()) {
-                        switch (ai.getElementType()) {
-                            case FORM:
-                                break;
-                            case QUESTION:
-                                break;
-                            case ANSWER:
-                                break;
-                            case CONTENT_CONTAINER:
-                                break;
-                            case INPUT_TEXT:
+            if (parentContainer != null) {
+                switch (parentContainer.getResultType()) {
+                    case SINGLE: {
+                        for (AbstractInput ai : parentContainer.getContentInputs()) {
+                            switch (ai.getElementType()) {
+                                case FORM:
+                                    break;
+                                case QUESTION:
+                                    break;
+                                case ANSWER:
+                                    break;
+                                case CONTENT_CONTAINER:
+                                    break;
+                                case INPUT_TEXT:
 //                            {
 //                                ai.setReturnContent(null);
 //                                changes.add(ai.getId());
 //                            }
+                                    break;
+                                case INPUT_OPTION: {
+                                    if (ai.getId().equals(ioc.getId())) {
+                                        continue;
+                                    }
+
+                                    InputOptionContent iocOther = (InputOptionContent) ai;
+
+                                    if (iocOther.isChecked() == false) {
+                                        continue;
+                                    }
+
+                                    iocOther.setChecked(false);
+                                    changes.add(ai.getId());
+                                    changes.addAll(runEvents(iocOther));
+                                }
                                 break;
-                            case INPUT_OPTION: {
-                                if (ai.getId().equals(ioc.getId())) {
-                                    continue;
-                                }
-
-                                InputOptionContent iocOther = (InputOptionContent) ai;
-
-                                if (iocOther.isChecked() == false) {
-                                    continue;
-                                }
-
-                                iocOther.setChecked(false);
-                                changes.add(ai.getId());
+                                default:
+                                    break;
                             }
-                            break;
-                            default:
-                                break;
-
                         }
                     }
-                }
-                break;
-                case MULTIPLE:
                     break;
-                default:
-                    break;
+                    case MULTIPLE:
+                        break;
+                    default:
+                        break;
 
+                }
             }
         }
+
+        ioc.setChecked(checked);
+
+        changes.add(ioc.getId());
+        changes.addAll(runEvents(ioc));
 
         return changes;
     }
@@ -390,8 +442,110 @@ public class QuestionFormOperationContext implements IQuestionFormOperation {
 
         afe.setEnabled(enabled);
 
+        if (!enabled) {
+            changes.addAll(makeUnreturnable(afe));
+        }
+
         changes.add(afe.getId());
         changes.addAll(runEvents(afe));
+
+        return changes;
+    }
+
+    private Collection<String> makeUnreturnable(AbstractFormElement abstractFormElement) {
+        Collection<String> changes = new ArrayList<>();
+
+        if (abstractFormElement == null) {
+            return changes;
+        }
+
+        switch (abstractFormElement.getElementType()) {
+            case FORM: {
+                QuestionForm qf = (QuestionForm) abstractFormElement;
+
+                FormBody fb = qf.getBody();
+
+                if (fb != null) {
+                    for (AbstractFormElement afe : fb.getChildren()) {
+                        changes.addAll(makeUnreturnable(afe));
+                    }
+                }
+            }
+            break;
+            case FORM_BODY: {
+                FormBody fb = (FormBody) abstractFormElement;
+
+                for (AbstractFormElement afe : fb.getChildren()) {
+                    changes.addAll(makeUnreturnable(afe));
+                }
+            }
+            break;
+            case SECTION: {
+                Section sc = (Section) abstractFormElement;
+
+                for (AbstractFormElement afe : sc.getChildren()) {
+                    changes.addAll(makeUnreturnable(afe));
+                }
+            }
+            break;
+            case QUESTION: {
+                Question q = (Question) abstractFormElement;
+
+                for (AbstractAnswer aa : q.getAnswers()) {
+                    changes.addAll(makeUnreturnable(aa));
+                }
+            }
+            break;
+            case ANSWER: {
+                AbstractAnswer aa = (AbstractAnswer) abstractFormElement;
+
+                for (ContentContainer cc : aa.getAnswerContentContainers()) {
+                    changes.addAll(makeUnreturnable(cc));
+                }
+            }
+            break;
+            case CONTENT_CONTAINER: {
+                ContentContainer cc = (ContentContainer) abstractFormElement;
+
+                for (AbstractInput ai : cc.getContentInputs()) {
+                    changes.addAll(makeUnreturnable(ai));
+                }
+            }
+            break;
+            case INPUT_TEXT: {
+                InputTextContent itc = (InputTextContent) abstractFormElement;
+
+                if (Strings.hasContent(itc.getStringReturnContent())) {
+                    itc.setReturnContent(null);
+
+                    changes.add(itc.getId());
+                    changes.addAll(runEvents(itc));
+
+                    for (ContentContainer ccSub : itc.getContentContainers()) {
+                        changes.addAll(makeUnreturnable(ccSub));
+                    }
+                }
+            }
+            break;
+            case INPUT_OPTION: {
+                InputOptionContent ioc = (InputOptionContent) abstractFormElement;
+
+                if (ioc.isChecked()) {
+                    ioc.setChecked(false);
+
+                    changes.add(ioc.getId());
+                    changes.addAll(runEvents(ioc));
+
+                    for (ContentContainer ccSub : ioc.getContentContainers()) {
+                        changes.addAll(makeUnreturnable(ccSub));
+                    }
+                }
+            }
+            break;
+            default:
+                break;
+
+        }
 
         return changes;
     }
@@ -432,13 +586,32 @@ public class QuestionFormOperationContext implements IQuestionFormOperation {
     }
 
     @Override
+    public Collection<AbstractFormElement> getElementsByClass(String className) {
+        Collection<AbstractFormElement> classElements = new ArrayList<>();
+
+        if (Strings.isNothing(className)) {
+            return classElements;
+        }
+
+        className = className.trim();
+
+        for (AbstractFormElement afe : _elementsHavingClasses) {
+            if (afe.hasClass(className)) {
+                classElements.add(afe);
+            }
+        }
+
+        return classElements;
+    }
+
+    @Override
     public FormResult getFormResult() {
         FormResult formResult = new FormResult();
         formResult.setId(_questionForm.getId());
         formResult.setLang(_questionForm.getLanguage());
         formResult.setVersion(_questionForm.getVersion());
 
-        for (Question question : _questionForm.getQuestions()) {
+        for (Question question : getQuestions()) {
 
             List<AbstractInput> returnableInputs = getReturnableInputs(question.getId());
 
@@ -509,8 +682,8 @@ public class QuestionFormOperationContext implements IQuestionFormOperation {
 
         return getReturnableInputs(afe);
     }
-    
-     @Override
+
+    @Override
     public boolean hasAnyReturnableInputs(String elementId) {
         AbstractFormElement afe = getElementById(elementId);
 
@@ -694,28 +867,46 @@ public class QuestionFormOperationContext implements IQuestionFormOperation {
         return !getReturnableInputs(afe).isEmpty();
     }
 
-    private List<AbstractInput> getReturnableInputs(AbstractFormElement afe) {
+    private List<AbstractInput> getReturnableInputs(AbstractFormElement abstractFormElement) {
         List<AbstractInput> inputs = new ArrayList<>();
 
-        if (afe == null) {
+        if (abstractFormElement == null) {
             return inputs;
         }
 
-        if (afe.isEnabled()) {
-            switch (afe.getElementType()) {
+        if (abstractFormElement.isEnabled()) {
+            switch (abstractFormElement.getElementType()) {
                 case FORM: {
-                    QuestionForm qf = (QuestionForm) afe;
-                    for (Question q : qf.getQuestions()) {
-                        if (q == null || !q.isEnabled()) {
-                            continue;
-                        }
+                    QuestionForm qf = (QuestionForm) abstractFormElement;
 
-                        inputs.addAll(getReturnableInputs(q.getId()));
+                    FormBody fb = qf.getBody();
+
+                    if (fb != null) {
+                        for (AbstractFormElement afe : fb.getChildren()) {
+                            inputs.addAll(getReturnableInputs(afe));
+                        }
                     }
                 }
                 break;
+                case FORM_BODY: {
+                    FormBody sc = (FormBody) abstractFormElement;
+
+                    for (AbstractFormElement afe : sc.getChildren()) {
+                        inputs.addAll(getReturnableInputs(afe));
+                    }
+                }
+                break;
+                case SECTION: {
+                    Section sc = (Section) abstractFormElement;
+
+                    for (AbstractFormElement afe : sc.getChildren()) {
+                        inputs.addAll(getReturnableInputs(afe));
+                    }
+                }
+                break;
+
                 case QUESTION: {
-                    Question q = (Question) afe;
+                    Question q = (Question) abstractFormElement;
                     for (AbstractAnswer aa : q.getAnswers()) {
                         if (aa == null || !aa.isEnabled()) {
                             continue;
@@ -726,7 +917,7 @@ public class QuestionFormOperationContext implements IQuestionFormOperation {
                 }
                 break;
                 case ANSWER: {
-                    AbstractAnswer aa = (AbstractAnswer) afe;
+                    AbstractAnswer aa = (AbstractAnswer) abstractFormElement;
                     for (ContentContainer cc : aa.getAnswerContentContainers()) {
                         if (cc == null || !cc.isEnabled()) {
                             continue;
@@ -737,7 +928,7 @@ public class QuestionFormOperationContext implements IQuestionFormOperation {
                 }
                 break;
                 case CONTENT_CONTAINER: {
-                    ContentContainer cc = (ContentContainer) afe;
+                    ContentContainer cc = (ContentContainer) abstractFormElement;
 
                     for (AbstractInput ai : cc.getContentInputs()) {
                         if (ai == null) {
@@ -764,7 +955,7 @@ public class QuestionFormOperationContext implements IQuestionFormOperation {
                 break;
                 case INPUT_TEXT:
                 case INPUT_OPTION: {
-                    AbstractInput ai = (AbstractInput) afe;
+                    AbstractInput ai = (AbstractInput) abstractFormElement;
                     if (ai.isIndividuallyReturnable()) {
                         inputs.add(ai);
                     }
@@ -779,29 +970,53 @@ public class QuestionFormOperationContext implements IQuestionFormOperation {
         return inputs;
     }
 
-    private boolean hasAnyReturnableInput(AbstractFormElement afe) {
+    private boolean hasAnyReturnableInput(AbstractFormElement abstractFormElement) {
 
-        if (afe == null) {
+        if (abstractFormElement == null) {
             return false;
         }
 
-        if (afe.isEnabled()) {
-            switch (afe.getElementType()) {
+        if (abstractFormElement.isEnabled()) {
+            switch (abstractFormElement.getElementType()) {
                 case FORM: {
-                    QuestionForm qf = (QuestionForm) afe;
-                    for (Question q : qf.getQuestions()) {
-                        if (q == null || !q.isEnabled()) {
+                    QuestionForm qf = (QuestionForm) abstractFormElement;
+                    FormBody fb = qf.getBody();
+
+                    if (hasAnyReturnableInput(fb)) {
+                        return true;
+                    }
+                }
+                break;
+                case FORM_BODY: {
+                    FormBody fb = (FormBody) abstractFormElement;
+
+                    for (AbstractFormElement afe : fb.getChildren()) {
+                        if (afe == null || !afe.isEnabled()) {
                             continue;
                         }
 
-                        if (hasAnyReturnableInput(q)) {
+                        if (hasAnyReturnableInput(afe)) {
+                            return true;
+                        }
+                    }
+                }
+                break;
+                case SECTION: {
+                    Section sc = (Section) abstractFormElement;
+
+                    for (AbstractFormElement afe : sc.getChildren()) {
+                        if (afe == null || !afe.isEnabled()) {
+                            continue;
+                        }
+
+                        if (hasAnyReturnableInput(afe)) {
                             return true;
                         }
                     }
                 }
                 break;
                 case QUESTION: {
-                    Question q = (Question) afe;
+                    Question q = (Question) abstractFormElement;
                     for (AbstractAnswer aa : q.getAnswers()) {
                         if (aa == null || !aa.isEnabled()) {
                             continue;
@@ -814,7 +1029,7 @@ public class QuestionFormOperationContext implements IQuestionFormOperation {
                 }
                 break;
                 case ANSWER: {
-                    AbstractAnswer aa = (AbstractAnswer) afe;
+                    AbstractAnswer aa = (AbstractAnswer) abstractFormElement;
                     for (ContentContainer cc : aa.getAnswerContentContainers()) {
                         if (cc == null || !cc.isEnabled()) {
                             continue;
@@ -827,7 +1042,7 @@ public class QuestionFormOperationContext implements IQuestionFormOperation {
                 }
                 break;
                 case CONTENT_CONTAINER: {
-                    ContentContainer cc = (ContentContainer) afe;
+                    ContentContainer cc = (ContentContainer) abstractFormElement;
 
                     for (AbstractInput ai : cc.getContentInputs()) {
                         if (ai == null) {
@@ -854,7 +1069,7 @@ public class QuestionFormOperationContext implements IQuestionFormOperation {
                 break;
                 case INPUT_TEXT:
                 case INPUT_OPTION: {
-                    AbstractInput ai = (AbstractInput) afe;
+                    AbstractInput ai = (AbstractInput) abstractFormElement;
                     return ai.isIndividuallyReturnable();
                 }
                 default:
@@ -912,6 +1127,18 @@ public class QuestionFormOperationContext implements IQuestionFormOperation {
                 }
             }
             break;
+            case ENABLE_ELEMENTS_BY_CLASS: {
+                EnableElementsByClassProcedure procedure = (EnableElementsByClassProcedure) abstractProcedure;
+
+                for (String className : procedure.getElementsClasses()) {
+                    Collection<AbstractFormElement> classElements = getElementsByClass(className);
+
+                    for (AbstractFormElement afeToEnable : classElements) {
+                        changes.addAll(setEnabled(afeToEnable.getId(), procedure.isEnabled()));
+                    }
+                }
+            }
+            break;
             default:
                 break;
         }
@@ -927,7 +1154,7 @@ public class QuestionFormOperationContext implements IQuestionFormOperation {
             return changes;
         }
 
-        List<AbstractFormEvent> events = abstractFormElement.getEvents();
+        Collection<AbstractFormEvent> events = abstractFormElement.getEvents();
 
         if (events != null && !events.isEmpty()) {
             for (AbstractFormEvent afe : events) {
@@ -1051,8 +1278,35 @@ public class QuestionFormOperationContext implements IQuestionFormOperation {
 //                    }
 //                }
                 break;
-            case SUM_IVS_BY_CLASSES:
-                break;
+            case SUM_IVS_BY_CLASSES: {
+                SumInputValuesByClassesOperation operation = (SumInputValuesByClassesOperation) abstractOperation;
+
+                List<Double> doubleVals = new ArrayList<Double>();
+
+                for (String className : operation.getInputClasses()) {
+
+                    if (Strings.hasNoContent(className)) {
+                        continue;
+                    }
+
+                    for (AbstractFormElement afeClass : getElementsByClass(className)) {
+                        if (afeClass instanceof AbstractInput) {
+                            AbstractInput abstractInput = (AbstractInput) afeClass;
+
+                            Double dblVal = NumberUtil.getAsDouble(abstractInput.getReturnContent());
+
+                            if (dblVal == null) {
+                                continue;
+                            }
+
+                            doubleVals.add(dblVal);
+                        }
+                    }
+                }
+
+                result = NumberUtil.sum(doubleVals);
+            }
+            break;
             default:
                 break;
 

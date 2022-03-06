@@ -1,16 +1,17 @@
 package test;
 
 import java.io.File;
+import java.util.Collection;
 import javax.xml.parsers.ParserConfigurationException;
-import mobvey.form.QuestionForm;
-import mobvey.form.answer.SimpleAnswer;
-import mobvey.form.answer.content.InputOptionContent;
-import mobvey.form.answer.content.InputTextContent;
-import mobvey.form.answer.content.container.ContentContainer;
-import mobvey.form.base.AbstractAnswer;
-import mobvey.form.base.AbstractInput;
-import mobvey.form.question.Question;
-import mobvey.parser.FormParser;
+import mobvey.form.elements.QuestionForm;
+import mobvey.form.elements.SimpleAnswer;
+import mobvey.form.elements.InputOptionContent;
+import mobvey.form.elements.InputTextContent;
+import mobvey.form.elements.ContentContainer;
+import mobvey.form.elements.AbstractAnswer;
+import mobvey.form.elements.AbstractInput;
+import mobvey.form.elements.Question;
+import mobvey.form.FormParser;
 
 /**
  *
@@ -34,7 +35,7 @@ public class FormParserTest {
         }
 
         FormParser fp = new FormParser(new File(filePath));
-        QuestionForm qf = fp.ParseXml("questions_workforce.xml");
+        QuestionForm qf = fp.parseXml("questions_workforce.xml");
 
 
         System.out.println("Form info: " + qf.toString());
@@ -47,8 +48,8 @@ public class FormParserTest {
 //        PrintForm(qfc);
     }
 
-    private static void PrintForm(QuestionForm qf) {
-        for (Question q : qf.getQuestions()) {
+    private static void PrintForm(Collection<Question> questions) {
+        for (Question q : questions) {
             System.out.println("Question info: " + q.toString());
 
             for (AbstractAnswer a : q.getAnswers()) {

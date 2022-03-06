@@ -3,15 +3,15 @@ package mobvey.form.operation;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import mobvey.form.QuestionForm;
-import mobvey.form.answer.SimpleAnswer;
-import mobvey.form.answer.content.InputOptionContent;
-import mobvey.form.answer.content.InputTextContent;
-import mobvey.form.answer.content.container.ContentContainer;
-import mobvey.form.base.AbstractAnswer;
-import mobvey.form.base.AbstractFormElement;
-import mobvey.form.base.AbstractInput;
-import mobvey.form.question.Question;
+import mobvey.form.elements.QuestionForm;
+import mobvey.form.elements.SimpleAnswer;
+import mobvey.form.elements.InputOptionContent;
+import mobvey.form.elements.InputTextContent;
+import mobvey.form.elements.ContentContainer;
+import mobvey.form.elements.AbstractAnswer;
+import mobvey.form.elements.AbstractFormElement;
+import mobvey.form.elements.AbstractInput;
+import mobvey.form.elements.Question;
 import mobvey.form.result.FormResult;
 import mobvey.models.InputValidationResult;
 
@@ -29,6 +29,7 @@ public interface IQuestionFormOperation {
     
     //get abstract level
     public AbstractFormElement getElementById(String id);
+    public Collection<AbstractFormElement> getElementsByClass(String className);
     public <TElement extends AbstractFormElement> TElement getElement(String id, Class<TElement> elementClass);
     public <TElement extends AbstractFormElement> Collection<TElement> getElements(Class<TElement> elementClass);
     public <TElement extends AbstractFormElement> TElement getParentElementOfType(String id, Class<TElement> elementClass);

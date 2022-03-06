@@ -6,6 +6,8 @@ package mobvey.form.enums;
  */
 public enum FormElementType {
     FORM,
+    FORM_BODY,
+    SECTION,
     QUESTION,
     ANSWER,
     CONTENT_CONTAINER,
