@@ -24,11 +24,26 @@ public class Strings {
 
         Object[] arrayElements = elements.toArray();
 
-        for (int ei = 0; ei < elements.size(); ei++) {
-            if (ei < elements.size() - 1) {
-                result += arrayElements[ei] + delimeter;
+        return join(delimeter, arrayElements);
+    }
+
+    public static String join(String delimeter, Object[] elements) {
+
+        String result = "";
+
+        if (delimeter == null) {
+            delimeter = "";
+        }
+
+        if (elements == null || elements.length == 0) {
+            return result;
+        }
+
+        for (int ei = 0; ei < elements.length; ei++) {
+            if (ei < elements.length - 1) {
+                result += elements[ei] + delimeter;
             } else {
-                result += arrayElements[ei];
+                result += elements[ei];
             }
         }
 
@@ -38,8 +53,8 @@ public class Strings {
     public static boolean hasContent(String value) {
         return !isNullOrEmpty(value);
     }
-    
-     public static boolean hasNoContent(String value) {
+
+    public static boolean hasNoContent(String value) {
         return isNullOrEmpty(value);
     }
 
@@ -51,7 +66,7 @@ public class Strings {
         return value == null || value.trim().equals("");
     }
 
-    public static String GetRandomIdString() {
+    public static String getRandomUuidString() {
         return UUID.randomUUID().toString();
     }
 

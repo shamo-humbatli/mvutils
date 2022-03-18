@@ -35,4 +35,21 @@ public class SumInputValuesByClassesOperation extends AbstractOperation {
 
         getInputClasses().add(className);
     }
+    
+    public boolean containsAtLeastOneClass(Collection<String> otherClasses)
+    {
+        if(otherClasses == null)
+            return false;
+        
+        
+        for(String cn : getInputClasses())
+        {
+            if(otherClasses.contains(cn))
+            {
+                return true;
+            }
+        }
+        
+        return false;
+    }
 }

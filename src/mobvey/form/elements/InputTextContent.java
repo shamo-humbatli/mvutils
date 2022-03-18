@@ -2,7 +2,6 @@ package mobvey.form.elements;
 
 import java.util.ArrayList;
 import mobvey.common.Strings;
-import mobvey.form.elements.ContentContainer;
 import mobvey.form.enums.FormElementType;
 import mobvey.form.enums.InputType;
 
@@ -40,7 +39,6 @@ public class InputTextContent extends AbstractInput {
         InputTextContent itc = new InputTextContent();
 
         itc.setColumnDefinition(columnDefinition);
-        itc.setColumnDefinitionDeclaredByDefault(columnDefinitionDeclaredByDefault);
         itc.setColumnDefinitionType(columnDefinitionType);
         itc.setComplex(complex);
         itc.setContentItemIndex(contentItemIndex);

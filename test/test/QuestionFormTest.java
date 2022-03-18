@@ -16,6 +16,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import mobvey.common.CollectionUtil;
 import mobvey.common.NumberUtil;
 import mobvey.common.Strings;
 import mobvey.condition.AbstractCondition;
@@ -33,7 +34,7 @@ import mobvey.form.elements.AbstractInput;
 import mobvey.form.enums.ComparisonType;
 import mobvey.form.enums.FormElementType;
 import mobvey.form.events.AbstractFormEvent;
-import mobvey.form.operation.IQuestionFormOperation;
+import mobvey.form.IQuestionFormOperation;
 import mobvey.form.elements.Question;
 import mobvey.form.result.FormResult;
 import mobvey.form.result.InputResult;
@@ -80,6 +81,19 @@ public class QuestionFormTest {
         printStr("onlyInputOptionCount: " + onlyInputOptionCount);
         printStr("containerCount: " + containerCount);
 
+//        printStr("-----------------------------------");
+//        printStr("FORM EVENTS");
+//
+//        for (Map.Entry<String, Collection<AbstractFormEvent>> entry : qfoc.getEvents().entrySet()) {
+//            for (AbstractFormEvent afev : entry.getValue()) {
+//                if (afev.getConditionGroup() != null) {
+//                    printStr(entry.getKey() + ": " + afev.getConditionGroup().toString());
+//                } else {
+//                    printStr(entry.getKey() + ": NO CONDITION");
+//                }
+//            }
+//        }
+//        printStr("-----------------------------------");
         Collection<AbstractInput> valueOpInputs = qfoc.getInputsHavingValueOperation();
 
         if (valueOpInputs.size() > 0) {
@@ -148,20 +162,22 @@ public class QuestionFormTest {
         AbstractFormElement randomElement = null;
         Random random = new Random();
         for (AbstractInput abstractInput : qfoc.getInputTextContents()) {
-            
-            if(abstractInput.getId().equals("a01"))
-            {
+
+            if (abstractInput.getId().equals("a01")) {
                 int x = 6;
             }
-            
+            String questionId = qfoc.getParentElementOfType(abstractInput.getId(), Question.class).getId();
             Double randomDbl = (random.nextDouble() + 1) * 10;
-            qfoc.setReturnValue(abstractInput.getId(), randomDbl);
+            Collection<String> chckChanges = qfoc.setReturnValue(abstractInput.getId(), randomDbl);
 
+            int orgc = chckChanges.size();
+            chckChanges = CollectionUtil.toDistinct(chckChanges);
+            printStr(questionId + " item changes(" + chckChanges.size() + "/" + orgc + "): " + Strings.join(", ", chckChanges));
             if (randomElement == null) {
                 randomElement = abstractInput;
             }
         }
-
+        printStr("-----------------------------------");
         for (InputOptionContent ioc : qfoc.getInputOptionContents()) {
 
             if (ioc.getId().equals("test1")) {
@@ -176,8 +192,31 @@ public class QuestionFormTest {
                 int x = 6;
             }
 
+            String questionId = qfoc.getParentElementOfType(ioc.getId(), Question.class).getId();
+            if (questionId.equals("c26dfgdgd")) {
+                int x = 6;
+                printStr("-----------------------------------");
+                printStr("--------------c26 events---------------------");
+
+                for (AbstractFormEvent afev : ioc.getEvents()) {
+
+                    printStr(afev.toString());
+                }
+
+                printStr("-----------------------------------");
+            }
+
+            printStr("-----------------------------------");
+//            for (AbstractFormEvent afev : ioc.getEvents()) {
+//
+//                printStr(afev.toString());
+//            }
+
             Collection<String> chckChanges = qfoc.setChecked(ioc.getId(), true);
-            int x = 6;
+            int orgc = chckChanges.size();
+            chckChanges = CollectionUtil.toDistinct(chckChanges);
+            printStr(questionId + " item changes(" + chckChanges.size() + "/" + orgc + "): " + Strings.join(", ", chckChanges));
+            printStr("-----------------------------------");
         }
 
         printStr("-----------------------------------");
@@ -219,9 +258,57 @@ public class QuestionFormTest {
         printStr("ccWithGenData input count: " + ccWithGenData.getContentInputs().size());
 
         printStr("-----------------------------------");
+        Collection<String> changes = qfoc.setEnabled("main_questions", false);
+        printChanges("main_questions", changes);
+        printStr("-----------------------------------");
+        changes = qfoc.setEnabled("main_questions", true);
+        printChanges("main_questions", changes);
+        printStr("-----------------------------------");
+        changes = qfoc.setEnabled("main_questions", false);
+        printChanges("main_questions", changes);
+        printStr("-----------------------------------");
+//        changes = qfoc.setEnabled("main_questions", true);
+//        printChanges("main_questions", changes);
+        printStr("-----------------------------------");
+
+        changes = qfoc.setReturnValue("d01i1", 12);
+        printChanges("d01i1", changes);
+        changes = qfoc.setReturnValue("d05i1", 12);
+        printChanges("d05i1", changes);
+
+        Object d07_i1rv = qfoc.getInputReturnValue("d07_i1");
+        printStr("d07_i1 value: " + d07_i1rv);
+        printStr("-----------------------------------");
+
+        changes = qfoc.setReturnValue("d01i1", 100);
+        qfoc.setReturnValue("anket_i1", -1);
+        
+        printChanges("d01i1", changes);
+        InputValidationResult ivr = qfoc.validateInput("d01i1");
+        printStr("IVR: " + ivr.toString());
+        printStr("-----------------------------------");
+        Collection<InputValidationResult> ivrs = qfoc.validateInputs();
+
+        Collection<AbstractInput> ihv = qfoc.getInputsHavingValidations();
+        
+        for (InputValidationResult vr : ivrs) {
+            printStr("IVR: " + vr.toString());
+        }
+
+        printStr("-----------------------------------");
+
+        Collection<ContentContainer> reqCcs = qfoc.getRequiredContainers();
+        printStr("Req cont size: " + reqCcs.size());
+        printStr("-----------------------------------");
     }
 
     static void printStr(String val) {
         System.out.println("->> " + val);
+    }
+
+    static void printChanges(String itemId, Collection<String> changes) {
+        int orgc = changes.size();
+        changes = CollectionUtil.toDistinct(changes);
+        printStr(itemId + " item changes(" + changes.size() + "/" + orgc + "): " + Strings.join(", ", changes));
     }
 }

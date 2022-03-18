@@ -51,7 +51,7 @@ import mobvey.form.FormParser;
  *
  * @author Shamo Humbatli
  */
-public class QuestionFormTest2 {
+public class QuestionFormTest4 {
 
     public static void main(String[] args) throws ParserConfigurationException {
 
@@ -62,48 +62,48 @@ public class QuestionFormTest2 {
         }
 
         FormParser fp = new FormParser(new File(filePath));
-        QuestionForm qf = fp.parseXml("questions_test1.xml");
+        QuestionForm qf = fp.parseXml("questions_test4.xml");
 
         QuestionFormOperationContext qfoc = new QuestionFormOperationContext(qf);
-        Question q4 = qfoc.getElement("q4", Question.class);
 
-        printStr("q4 should be disabled: " + !q4.isEnabled());
-
-        Collection<String> changes = qfoc.setChecked("q3_i4", true);
-        printStr("changes: " + Strings.join(", ", changes));
-
-        printStr("q4 should be enabled: " + q4.isEnabled());
-
-        changes = qfoc.setChecked("q3_i3", true);
-        printStr("changes: " + Strings.join(", ", changes));
-        printStr("q4 should be disabled: " + !q4.isEnabled());
-
-        ContentContainer cc = qfoc.getElement("q3_c1", ContentContainer.class);
-        printStr("q3_c1 should be not required: " + !cc.isReturnRequeired());
-
-        changes = qfoc.setReturnRequired("q3_c1", true);
-        printStr("changes: " + Strings.join(", ", changes));
-
-        printStr("q3_c1 should be required: " + cc.isReturnRequeired());
-        printStr("----------------------");
-        AbstractFormElement afe1 = qfoc.getElementById("q4_i1");
-        AbstractFormElement afe2 = qfoc.getElementById("q5");
-
-        printStr("q4_i1 should be disabled: " + !afe1.isEnabled());
-        printStr("q5 should be disabled: " + !afe2.isEnabled());
-        changes = qfoc.setEnabled("q4_i1", true);
-        printStr("changes: " + Strings.join(", ", changes));
-        printStr("q4_i1 should be enabled: " + afe1.isEnabled());
-        printStr("q5 should be enabked: " + afe2.isEnabled());
-
+      Collection<String> changes;
+        
+        //complex event test
         printStr("----------------------");
 
-        changes = qfoc.setEnabled("q4_i1", false);
-        printStr("changes: " + Strings.join(", ", changes));
-        printStr("q4_i1 should be disabled: " + !afe1.isEnabled());
-        printStr("q5 should be disabled: " + !afe2.isEnabled());
+        Question d05 = qfoc.getElement("d05", Question.class);
+        Question d09 = qfoc.getElement("d09", Question.class);
+        Question d13 = qfoc.getElement("d13", Question.class);
 
-        // InputOptionContent ioc = qfoc.getElement("q3_i4", InputOptionContent.class);
+        changes = qfoc.setChecked("c22_i1", true);
+        printStr("c22_i1 changes: " + Strings.join(", ", changes));
+
+        changes = qfoc.setReturnValue("d04_i1", 40);
+        printStr("d04_i1 changes: " + Strings.join(", ", changes));
+
+        printStr("d05 should be enabled: " + d05.isEnabled());
+        printStr("d09 should be disabled: " + !d09.isEnabled());
+        printStr("d13 should be disabled: " + !d13.isEnabled());
+
+        printStr("----------------------");
+        changes = qfoc.setChecked("c22_i2", true);
+        printStr("c22_i2 changes: " + Strings.join(", ", changes));
+
+        changes = qfoc.setReturnValue("d04_i1", 39);
+        printStr("d04_i1 changes: " + Strings.join(", ", changes));
+
+        printStr("d05 should be disabled: " + !d05.isEnabled());
+        printStr("d09 should be enabled: " + d09.isEnabled());
+        printStr("d13 should be disabled: " + !d13.isEnabled());
+        printStr("----------------------");
+        changes = qfoc.setReturnValue("d04_i1", 40);
+        printStr("d04_i1 changes: " + Strings.join(", ", changes));
+
+        printStr("d05 should be disabled: " + !d05.isEnabled());
+        printStr("d09 should be disabled: " + !d09.isEnabled());
+        printStr("d13 should be enabled: " + d13.isEnabled());
+        printStr("----------------------");
+
     }
 
     static void printStr(String val) {

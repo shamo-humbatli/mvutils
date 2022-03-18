@@ -20,7 +20,6 @@ public abstract class AbstractInput extends AbstractFormElement {
 
     protected String columnDefinition = "0";
     protected ColumnDefinitionType columnDefinitionType = ColumnDefinitionType.CI;
-    protected boolean columnDefinitionDeclaredByDefault = true;
     protected String contentItemIndex;
     protected InputValueType inputValueType;
     protected final InputType inputType;
@@ -33,7 +32,7 @@ public abstract class AbstractInput extends AbstractFormElement {
 
     protected Object returnContent = null;
 
-    protected List<AbstractCondition> _validations;
+    protected Collection<AbstractCondition> _validations;
 
     protected AbstractOperation _valueOperation;
 
@@ -167,31 +166,27 @@ public abstract class AbstractInput extends AbstractFormElement {
         this.columnDefinitionType = columnDefinitionType;
     }
 
-    public boolean isColumnDefinitionDeclaredByDefault() {
-        return columnDefinitionDeclaredByDefault;
-    }
-
-    public void setColumnDefinitionDeclaredByDefault(boolean columnDefinitionDeclaredByDefault) {
-        this.columnDefinitionDeclaredByDefault = columnDefinitionDeclaredByDefault;
-    }
-
-    public List<AbstractCondition> getValidations() {
-        return _validations;
-    }
-
-    public void setValidations(List<AbstractCondition> _validations) {
-        this._validations = _validations;
-    }
-
-    public void addValidation(AbstractCondition abstractCondition) {
+    public Collection<AbstractCondition> getValidations() {
         if (_validations == null) {
             _validations = new ArrayList<>();
         }
 
-        _validations.add(abstractCondition);
+        return _validations;
     }
-    
-     public void addValidations(Collection<? extends AbstractCondition> validations) {
+
+    public void setValidations(Collection<AbstractCondition> _validations) {
+        this._validations = _validations;
+    }
+
+    public void addValidation(AbstractCondition abstractCondition) {
+        if (abstractCondition == null) {
+            return;
+        }
+
+        getValidations().add(abstractCondition);
+    }
+
+    public void addValidations(Collection<? extends AbstractCondition> validations) {
         if (validations == null) {
             return;
         }
@@ -222,6 +217,6 @@ public abstract class AbstractInput extends AbstractFormElement {
 
     @Override
     public String toString() {
-        return "AbstractInput{" + "id=" + _id + ", columnDefinition=" + columnDefinition + ", columnDefinitionType=" + columnDefinitionType + ", columnDefinitionDeclaredByDefault=" + columnDefinitionDeclaredByDefault + ", contentItemIndex=" + contentItemIndex + ", inputValueType=" + inputValueType + ", inputType=" + inputType + ", displayContent=" + displayContent + ", parentId=" + getParentId() + ", complex=" + complex + ", containersRequired=" + containersRequired + ", returnContent=" + returnContent + '}';
+        return "AbstractInput{" + "id=" + _id + ", columnDefinition=" + columnDefinition + ", columnDefinitionType=" + columnDefinitionType + ", contentItemIndex=" + contentItemIndex + ", inputValueType=" + inputValueType + ", inputType=" + inputType + ", displayContent=" + displayContent + ", parentId=" + getParentId() + ", complex=" + complex + ", containersRequired=" + containersRequired + ", returnContent=" + returnContent + '}';
     }
 }

@@ -1,5 +1,6 @@
 package mobvey.condition;
 
+import mobvey.form.enums.ConditionType;
 import mobvey.form.enums.ComparisonType;
 
 /**
@@ -29,5 +30,13 @@ public class CompareWithDirectValueCondition extends AbstractCondition {
 
     public CompareWithDirectValueCondition() {
         super(ConditionType.COMPARE_WITH_DV);
+    }
+
+    @Override
+    public String[] getConditionParams() {
+        return new String[]{
+            String.valueOf(compareWith),
+            String.valueOf(comparisonType)
+        };
     }
 }

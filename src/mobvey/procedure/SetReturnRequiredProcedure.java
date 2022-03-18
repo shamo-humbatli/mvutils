@@ -1,6 +1,7 @@
 package mobvey.procedure;
 
 import java.util.List;
+import mobvey.common.ParamUtil;
 import mobvey.form.enums.EventProcedureType;
 
 /**
@@ -30,5 +31,13 @@ public class SetReturnRequiredProcedure extends AbstractProcedure{
 
     public void setRequired(boolean required) {
         this._required = required;
+    }
+    
+    @Override
+    public String[] getProcedureParams() {
+        return new String[]{
+            String.valueOf(_required),
+            ParamUtil.getAsArray(getElements())
+        };
     }
 }

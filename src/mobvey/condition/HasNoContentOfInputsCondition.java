@@ -1,10 +1,12 @@
 package mobvey.condition;
 
+import mobvey.form.enums.ConditionType;
 import java.util.Collection;
+import mobvey.common.ParamUtil;
 
 /**
  *
- * @author ShamoHumbatli
+ * @author Shamo Humbatli
  */
 public class HasNoContentOfInputsCondition extends AbstractCondition {
 
@@ -22,4 +24,10 @@ public class HasNoContentOfInputsCondition extends AbstractCondition {
         this._inputIds = inputIds;
     }
 
+    @Override
+    public String[] getConditionParams() {
+        return new String[]{
+            ParamUtil.getAsArray(_inputIds)
+        };
+    }
 }

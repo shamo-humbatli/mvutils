@@ -16,16 +16,14 @@ public class InputResult implements Serializable {
 
     private String returnValue;
 
-    public String getColumnDescription()
-    {
-        return columnDefinitionType + ":" + columnDefinition;
+    public String getColumnDescription() {
+        return columnDefinition + ":" + columnDefinition;
     }
-    
-    public boolean hasColumnDefinition()
-    {
+
+    public boolean hasColumnDefinition() {
         return Strings.hasContent(columnDefinition);
     }
-    
+
     public String getId() {
         return id;
     }
@@ -47,6 +45,11 @@ public class InputResult implements Serializable {
     }
 
     public void setColumnDefinition(String columnDefinition) {
+
+        if (Strings.isNullOrEmpty(columnDefinition)) {
+            columnDefinition = "0";
+        }
+
         this.columnDefinition = columnDefinition;
     }
 
@@ -55,22 +58,25 @@ public class InputResult implements Serializable {
     }
 
     public void setColumnDefinitionType(ColumnDefinitionType columnDefinitionType) {
+
+        if (columnDefinitionType == ColumnDefinitionType.NS) {
+            return;
+        }
+
         this.columnDefinitionType = columnDefinitionType;
     }
 
-    
-    public InputResult CloneExact()
-    {
+    public InputResult CloneExact() {
         InputResult ir = new InputResult();
-        
+
         ir.setReturnValue(returnValue);
         ir.setColumnDefinition(columnDefinition);
         ir.setColumnDefinitionType(columnDefinitionType);
         ir.setId(id);
-        
+
         return ir;
     }
-    
+
     @Override
     public String toString() {
         return "InputResult{" + "id=" + id + ", columnDefinition=" + columnDefinition + ", columnDefinitionType=" + columnDefinitionType + ", returnValue=" + returnValue + '}';

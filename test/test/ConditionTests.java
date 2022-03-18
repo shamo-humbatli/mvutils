@@ -16,11 +16,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import mobvey.common.ConditionUtil;
 import mobvey.common.NumberUtil;
 import mobvey.common.Strings;
 import mobvey.condition.AbstractCondition;
 import mobvey.condition.CompareWithDirectValueCondition;
 import mobvey.condition.CompareWithInputValueCondition;
+import mobvey.condition.ConditionGroup;
 import mobvey.condition.IsInRangeOfDirectValuesCondition;
 import mobvey.condition.IsInRangeOfInputValuesCondition;
 import mobvey.form.elements.SimpleAnswer;
@@ -51,59 +53,31 @@ import mobvey.form.FormParser;
  *
  * @author Shamo Humbatli
  */
-public class QuestionFormTest2 {
+public class ConditionTests {
 
     public static void main(String[] args) throws ParserConfigurationException {
 
-        String filePath = "C:\\Test";
+        String condition = "check_checked(true) and has_content_ivs(x1,x2) or (check_enabled_elms(a1) and has_content)";
 
-        if (filePath == null) {
-            return;
-        }
+        ConditionGroup cg = ConditionUtil.buildConditionGroup(condition);
 
-        FormParser fp = new FormParser(new File(filePath));
-        QuestionForm qf = fp.parseXml("questions_test1.xml");
+        String conditionObt = cg.toString();
 
-        QuestionFormOperationContext qfoc = new QuestionFormOperationContext(qf);
-        Question q4 = qfoc.getElement("q4", Question.class);
-
-        printStr("q4 should be disabled: " + !q4.isEnabled());
-
-        Collection<String> changes = qfoc.setChecked("q3_i4", true);
-        printStr("changes: " + Strings.join(", ", changes));
-
-        printStr("q4 should be enabled: " + q4.isEnabled());
-
-        changes = qfoc.setChecked("q3_i3", true);
-        printStr("changes: " + Strings.join(", ", changes));
-        printStr("q4 should be disabled: " + !q4.isEnabled());
-
-        ContentContainer cc = qfoc.getElement("q3_c1", ContentContainer.class);
-        printStr("q3_c1 should be not required: " + !cc.isReturnRequeired());
-
-        changes = qfoc.setReturnRequired("q3_c1", true);
-        printStr("changes: " + Strings.join(", ", changes));
-
-        printStr("q3_c1 should be required: " + cc.isReturnRequeired());
-        printStr("----------------------");
-        AbstractFormElement afe1 = qfoc.getElementById("q4_i1");
-        AbstractFormElement afe2 = qfoc.getElementById("q5");
-
-        printStr("q4_i1 should be disabled: " + !afe1.isEnabled());
-        printStr("q5 should be disabled: " + !afe2.isEnabled());
-        changes = qfoc.setEnabled("q4_i1", true);
-        printStr("changes: " + Strings.join(", ", changes));
-        printStr("q4_i1 should be enabled: " + afe1.isEnabled());
-        printStr("q5 should be enabked: " + afe2.isEnabled());
-
+        // boolean isCorr = conditionObt.equals(condition);
+        printStr("Initial Cond Str: " + condition);
+        printStr("Gen Cond Str: " + conditionObt);
         printStr("----------------------");
 
-        changes = qfoc.setEnabled("q4_i1", false);
-        printStr("changes: " + Strings.join(", ", changes));
-        printStr("q4_i1 should be disabled: " + !afe1.isEnabled());
-        printStr("q5 should be disabled: " + !afe2.isEnabled());
+        condition = "check_checked(true) and has_content_ivs(x1,x2) or (check_enabled_elms(a1) and has_content) and ((compare_with_dv(45, EQ) and check_checked(true)) and (has_content_ivs([a1, a2]) or CHECK_ENABLED_ELMS(true, [x1, x2]))) or has_content";
 
-        // InputOptionContent ioc = qfoc.getElement("q3_i4", InputOptionContent.class);
+        cg = ConditionUtil.buildConditionGroup(condition);
+
+        conditionObt = cg.toString();
+
+        // boolean isCorr = conditionObt.equals(condition);
+        printStr("Initial Cond Str: " + condition);
+        printStr("Gen Cond Str: " + conditionObt);
+
     }
 
     static void printStr(String val) {

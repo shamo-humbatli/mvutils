@@ -2,6 +2,7 @@ package mobvey.procedure;
 
 import java.util.ArrayList;
 import java.util.List;
+import mobvey.common.ParamUtil;
 import mobvey.form.enums.EventProcedureType;
 
 /**
@@ -26,5 +27,12 @@ public class EnableElementsProcedure extends AbstractProcedure {
 
     public void setElementsIdsToEnable(List<String> elementsIdsToEnable) {
         this._elementsIdsToEnable = elementsIdsToEnable;
+    }
+    
+    @Override
+    public String[] getProcedureParams() {
+        return new String[]{
+            ParamUtil.getAsArray(getElementsIdsToEnable())
+        };
     }
 }

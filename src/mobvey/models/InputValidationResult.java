@@ -42,9 +42,15 @@ public class InputValidationResult implements Serializable {
     public AbstractInput getInput() {
         return _input;
     }
+    
+    public String getInputId()   
+    {
+        return _input.getId();
+    }
 
     @Override
     public String toString() {
-        return "InputValidationResult{" + "isValid=" + _isValid + '}';
+        String condStr = _condition == null ? "null" : _condition.toString();
+        return "InputValidationResult{input=" + getInputId() + "; isValid=" + _isValid + "; condition=" + condStr +'}';
     }
 }

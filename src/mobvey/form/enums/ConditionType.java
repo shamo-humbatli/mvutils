@@ -1,4 +1,4 @@
-package mobvey.condition;
+package mobvey.form.enums;
 
 /**
  *
@@ -12,7 +12,11 @@ public enum ConditionType {
     IS_IN_RANGE_DVS,
     IS_IN_RANGE_IVS,
     HAS_CONTENT,
-    HAS_NO_CONTENT,
+    HAS_NO_CONTENT,    
+    CHECK_ENABLED,    
+    CHECK_ENABLED_ELMS,
+    CHECK_CHECKED,
+    CHECK_CHECKED_ELMS,
     HAS_CONTENT_IVS,
     HAS_NO_CONTENT_IVS,
 }

@@ -1,14 +1,15 @@
 package mobvey.condition;
 
+import mobvey.form.enums.ConditionType;
 import mobvey.form.enums.ComparisonType;
 
 /**
  *
- * @author ShamoHumbatli
+ * @author Shamo Humbatli
  */
 public class CompareInputValueWithDirectValueCondition extends AbstractCondition {
 
-    private Double compareWith;    
+    private Double compareWith;
     private String comparingInputId;
 
     private ComparisonType comparisonType;
@@ -36,8 +37,16 @@ public class CompareInputValueWithDirectValueCondition extends AbstractCondition
     public void setComparisonType(ComparisonType comparisonType) {
         this.comparisonType = comparisonType;
     }
-    
+
     public CompareInputValueWithDirectValueCondition() {
         super(ConditionType.COMPARE_IV_DV);
+    }
+
+    @Override
+    public String[] getConditionParams() {
+        return new String[]{
+            comparingInputId,
+            String.valueOf(compareWith)
+        };
     }
 }
