@@ -1,9 +1,12 @@
 package mobvey.form.elements;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import mobvey.common.KeyValuePair;
+import mobvey.common.Strings;
 import mobvey.condition.AbstractCondition;
 import mobvey.form.elements.ContentContainer;
 import mobvey.form.enums.ColumnDefinitionType;
@@ -25,6 +28,7 @@ public abstract class AbstractInput extends AbstractFormElement {
     protected final InputType inputType;
     protected Object displayContent;
     protected boolean complex = false;
+    protected String _format;
 
     protected List<KeyValuePair<String, Boolean>> containersRequired;
 
@@ -82,7 +86,42 @@ public abstract class AbstractInput extends AbstractFormElement {
     }
 
     public String getStringReturnContent() {
-        return returnContent == null ? null : String.valueOf(returnContent);
+        return getFormattedReturnContent();
+    }
+
+    public String getFormattedReturnContent() {
+        if (returnContent == null) {
+            return null;
+        }
+
+        if (Strings.isNullOrEmpty(_format)) {
+            return returnContent.toString();
+        }
+
+        String formattedRc;
+
+        try {
+            switch (inputValueType) {
+                case TEXT:
+                case INT:
+                case DOUBLE:
+                    formattedRc = String.format(_format, returnContent);
+                    break;
+                case DATE_TIME:
+                case DATE:
+                case TIME:
+                    SimpleDateFormat sdf = new SimpleDateFormat(_format);
+                    formattedRc = sdf.format(returnContent);
+                    break;
+                default:
+                    formattedRc = String.format(_format, returnContent);
+            }
+        } catch (Exception exp) {
+            //exp ignored
+            formattedRc = returnContent.toString();
+        }
+
+        return formattedRc;
     }
 
     public void setReturnContent(Object returnContent) {
@@ -205,12 +244,20 @@ public abstract class AbstractInput extends AbstractFormElement {
     public String getHrDisplayText() {
         switch (inputType) {
             case TEXT:
-                return returnContent == null ? "" : returnContent.toString();
+                return returnContent == null ? "" : getFormattedReturnContent();
             case OPTION:
-                return displayContent.toString();
+                return getFormattedReturnContent();
             default:
                 return "";
         }
+    }
+
+    public String getFormat() {
+        return _format;
+    }
+
+    public void setFormat(String _format) {
+        this._format = _format;
     }
 
     public abstract boolean isIndividuallyReturnable();

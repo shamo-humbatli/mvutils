@@ -917,7 +917,7 @@ public class QuestionFormOperationContext implements IQuestionFormOperation {
                     ir.setColumnDefinition(ai.getColumnDefinition());
                     ir.setColumnDefinitionType(ai.getColumnDefinitionType());
                     ir.setId(ai.getId());
-                    ir.setReturnValue(String.valueOf(ai.getReturnContent()));
+                    ir.setReturnValue(ai.getFormattedReturnContent());
 
                     qr.AddInputResult(ir);
                 }

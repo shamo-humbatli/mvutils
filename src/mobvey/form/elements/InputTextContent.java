@@ -49,6 +49,7 @@ public class InputTextContent extends AbstractInput {
         itc.setReturnContent(returnContent);
         itc.setDisplayContent(displayContent);
         itc.setReadonly(readonly);
+        itc.setFormat(_format);
         itc.setPlaceHolder(placeHolder);
         itc.setValueOperation(_valueOperation);
 
@@ -81,6 +82,6 @@ public class InputTextContent extends AbstractInput {
 
     @Override
     public boolean isIndividuallyReturnable() {
-        return Strings.hasContent(getStringReturnContent()) && isEnabled();
+        return isEnabled() && Strings.hasContent(getStringReturnContent());
     }
 }

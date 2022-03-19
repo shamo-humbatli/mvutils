@@ -12,6 +12,7 @@ import mobvey.form.result.InputResult;
 import mobvey.form.result.QuestionResult;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -167,8 +168,26 @@ public class QuestionFormTest {
                 int x = 6;
             }
             String questionId = qfoc.getParentElementOfType(abstractInput.getId(), Question.class).getId();
-            Double randomDbl = (random.nextDouble() + 1) * 10;
-            Collection<String> chckChanges = qfoc.setReturnValue(abstractInput.getId(), randomDbl);
+            Object returnContent;
+
+            switch (abstractInput.getInputValueType()) {
+                case INT:
+                    returnContent = (int) ((random.nextDouble() + 1) * 10);
+                    break;
+                case TEXT:
+                case DOUBLE:
+                    returnContent = String.valueOf((random.nextDouble() + 1) * 10);
+                    break;
+                case DATE_TIME:
+                case DATE:
+                case TIME:
+                    returnContent = new Date();
+                    break;
+                default:
+                    throw new AssertionError(abstractInput.getInputValueType().name());
+            }
+
+            Collection<String> chckChanges = qfoc.setReturnValue(abstractInput.getId(), returnContent);
 
             int orgc = chckChanges.size();
             chckChanges = CollectionUtil.toDistinct(chckChanges);
@@ -282,7 +301,7 @@ public class QuestionFormTest {
 
         changes = qfoc.setReturnValue("d01i1", 100);
         qfoc.setReturnValue("anket_i1", -1);
-        
+
         printChanges("d01i1", changes);
         InputValidationResult ivr = qfoc.validateInput("d01i1");
         printStr("IVR: " + ivr.toString());
@@ -290,7 +309,7 @@ public class QuestionFormTest {
         Collection<InputValidationResult> ivrs = qfoc.validateInputs();
 
         Collection<AbstractInput> ihv = qfoc.getInputsHavingValidations();
-        
+
         for (InputValidationResult vr : ivrs) {
             printStr("IVR: " + vr.toString());
         }

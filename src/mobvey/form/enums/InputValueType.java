@@ -9,5 +9,8 @@ import java.io.Serializable;
 public enum InputValueType implements Serializable {
     TEXT,
     INT,
-    DOUBLE
+    DOUBLE,
+    DATE_TIME,
+    DATE,
+    TIME
 }
