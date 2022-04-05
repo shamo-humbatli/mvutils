@@ -13,7 +13,6 @@ import mobvey.form.elements.AbstractFormElement;
 import mobvey.form.elements.AbstractInput;
 import mobvey.form.elements.Question;
 import mobvey.form.events.AbstractFormEvent;
-import mobvey.form.events.FormEvent;
 import mobvey.form.result.FormResult;
 import mobvey.models.InputValidationResult;
 
@@ -61,6 +60,7 @@ public interface IQuestionFormOperation {
     public Map<String, Collection<AbstractFormEvent>> getEvents();
     public String getActualShortDescription();
     public Object getInputReturnValue(String inputId);
+    public String getInputFormmatedReturnValue(String inputId);
     
     public List<AbstractInput> getReturnableInputs(String elementId);
     public int getFormElementsCount();

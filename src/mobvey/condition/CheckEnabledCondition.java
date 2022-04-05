@@ -12,7 +12,7 @@ public class CheckEnabledCondition extends AbstractCondition {
         super(ConditionType.CHECK_ENABLED);
     }
 
-    protected boolean _enabled = false;
+    protected boolean _enabled = true;
 
     public boolean isEnabled() {
         return _enabled;

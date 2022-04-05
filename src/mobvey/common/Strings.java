@@ -91,4 +91,52 @@ public class Strings {
 
         return result;
     }
+
+    public static int getNextIndexOf(String source, String value, int occurance) {
+        if (occurance < 1) {
+            return -1;
+        }
+
+        if (Strings.isNullOrEmpty(source) || Strings.isNullOrEmpty(value)) {
+            return -1;
+        }
+
+        int sl = source.length();
+        int vl = value.length();
+
+        int occurs = 0;
+        int foundIndex = -1;
+        int ll = 0;
+
+        while (occurs <= occurance) {
+            occurs++;
+
+            int ind = source.indexOf(value);
+
+            if (ind >= 0) {
+                if (occurs == occurance) {
+                    foundIndex = ind + ll;
+                }
+
+                int llt = ind + vl;
+                ll += llt;
+                source = source.substring(llt);
+            } else {
+                break;
+            }
+        }
+
+        return foundIndex;
+    }
+
+    public static boolean containsIgnoringCase(String source, String value) {
+        if (Strings.isNullOrEmpty(source) || Strings.isNullOrEmpty(value)) {
+            return false;
+        }
+
+        source = source.replace("İ", "I");
+        value = value.replace("İ", "I");
+
+        return source.toLowerCase().contains(value.toLowerCase());
+    }
 }

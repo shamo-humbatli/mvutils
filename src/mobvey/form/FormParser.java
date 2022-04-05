@@ -475,11 +475,13 @@ public class FormParser {
                     input.setReturnContent(returnContentCommon);
                 }
 
-                if (Strings.hasContent(columnDef)) {
+                if (Strings.hasContent(columnDef) 
+                        && Strings.isNullOrEmpty(input.getColumnDefinition())) {
                     input.setColumnDefinition(columnDef.trim());
                 }
 
-                if (Strings.hasContent(columnDefType) && input.getColumnDefinitionType() == ColumnDefinitionType.NS) {
+                if (Strings.hasContent(columnDefType) 
+                        && input.getColumnDefinitionType() == ColumnDefinitionType.NS) {
                     input.setColumnDefinitionType(ColumnDefinitionType.valueOf(columnDefType.trim().toUpperCase()));
                 }
 
@@ -810,7 +812,6 @@ public class FormParser {
             }
 
             if (Strings.hasContent(operationStr)) {
-
                 AbstractOperation valueOperation = buildOperation(operationStr);
                 abstractInput.setValueOperation(valueOperation);
             }
@@ -1091,7 +1092,7 @@ public class FormParser {
             procedureStr = procedureStr.trim();
 
             int p11 = procedureStr.indexOf("(");
-            int p12 = procedureStr.indexOf(")");
+            int p12 = procedureStr.lastIndexOf(")");
             String procParamsStr = procedureStr.substring(p11 + 1, p12).trim();
             String procName = procedureStr.substring(0, p11).trim();
 
@@ -1154,7 +1155,7 @@ public class FormParser {
             }
 
             int p11 = operationStr.indexOf("(");
-            int p12 = operationStr.indexOf(")");
+            int p12 = operationStr.lastIndexOf(")");
             String contentRaw = operationStr.substring(p11 + 1, p12);
             String cmd = operationStr.substring(0, p11);
 

@@ -12,7 +12,7 @@ public class CheckCheckedCondition extends AbstractCondition {
         super(ConditionType.CHECK_CHECKED);
     }
 
-    protected boolean _checked = false;
+    protected boolean _checked = true;
 
     public boolean isChecked() {
         return _checked;

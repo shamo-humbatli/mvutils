@@ -9,6 +9,12 @@ import mobvey.condition.CheckCheckedCondition;
 import mobvey.condition.CheckElementsAreCheckedCondition;
 import mobvey.condition.CheckElementsAreEnabledCondition;
 import mobvey.condition.CheckEnabledCondition;
+import mobvey.condition.CheckLengthCondition;
+import mobvey.condition.CheckLengthOfElementsCondition;
+import mobvey.condition.CheckLengthRangeCondition;
+import mobvey.condition.CheckLengthRangeOfElementsCondition;
+import mobvey.condition.CheckRegexCondition;
+import mobvey.condition.CheckRegexOnElementsCondition;
 import mobvey.condition.CompareInputValueWithDirectValueCondition;
 import mobvey.condition.CompareInputValueWithInputValueCondition;
 import mobvey.condition.CompareWithDirectValueCondition;
@@ -95,7 +101,6 @@ public class ConditionUtil {
             return new ConditionGroup(ac);
         }
 
-        
         ConditionCombination condComb = new ConditionCombination(cct);
 
         for (String cg : cgs) {
@@ -122,7 +127,7 @@ public class ConditionUtil {
         }
 
         int p11 = conditionStr.indexOf("(");
-        int p12 = conditionStr.indexOf(")");
+        int p12 = conditionStr.lastIndexOf(")");
         String contentRaw = "";
         String cmd = "";
 
@@ -264,6 +269,76 @@ public class ConditionUtil {
                 } else {
                     condition.setElementsIds(Arrays.asList(ParamUtil.getParamArrayItems(params[0])));
                 }
+
+                abstractCondition = condition;
+            }
+            break;
+            case CHECK_REGEX: {
+                String[] params = ParamUtil.getParamArrayItems(contentRaw);
+                CheckRegexCondition condition = new CheckRegexCondition();
+
+                if (params.length > 1) {
+                    condition.setValidity(Boolean.valueOf(params[0].toLowerCase()));
+                    condition.setPattern(ParamUtil.getStringValue(params[1]));
+                } else {
+                    condition.setPattern(ParamUtil.getStringValue(params[0]));
+                }
+
+                abstractCondition = condition;
+            }
+            break;
+            case CHECK_REGEX_ELMS: {
+                String[] params = ParamUtil.getParamArrayItems(contentRaw);
+                CheckRegexOnElementsCondition condition = new CheckRegexOnElementsCondition();
+
+                if (params.length > 2) {
+                    condition.setValidity(Boolean.valueOf(params[0].toLowerCase()));
+                    condition.setPattern(ParamUtil.getStringValue(params[1]));
+                    condition.setElementsIds(Arrays.asList(ParamUtil.getParamArrayItems(params[2])));
+                } else {
+                    condition.setPattern(ParamUtil.getStringValue(params[0]));
+                    condition.setElementsIds(Arrays.asList(ParamUtil.getParamArrayItems(params[1])));
+                }
+
+                abstractCondition = condition;
+            }
+            break;
+            case CHECK_LENGTH: {
+                String[] params = ParamUtil.getParamArrayItems(contentRaw);
+
+                CheckLengthCondition condition = new CheckLengthCondition();
+                condition.setLength(Integer.valueOf(params[0]));
+
+                abstractCondition = condition;
+            }
+            break;
+            case CHECK_LENGTH_ELMS: {
+                String[] params = ParamUtil.getParamArrayItems(contentRaw);
+
+                CheckLengthOfElementsCondition condition = new CheckLengthOfElementsCondition();
+                condition.setLength(Integer.valueOf(params[0]));
+                condition.setElementsIds(Arrays.asList(ParamUtil.getParamArrayItems(params[1])));
+
+                abstractCondition = condition;
+            }
+            break;
+            case CHECK_LENGTH_RANGE: {
+                String[] params = ParamUtil.getParamArrayItems(contentRaw);
+
+                CheckLengthRangeCondition condition = new CheckLengthRangeCondition();
+                condition.setMinLength(Integer.valueOf(params[0]));
+                condition.setMaxLength(Integer.valueOf(params[1]));
+
+                abstractCondition = condition;
+            }
+            break;
+            case CHECK_LENGTH_RANGE_ELMS: {
+                String[] params = ParamUtil.getParamArrayItems(contentRaw);
+
+                CheckLengthRangeOfElementsCondition condition = new CheckLengthRangeOfElementsCondition();
+                condition.setMinLength(Integer.valueOf(params[0]));
+                condition.setMaxLength(Integer.valueOf(params[1]));
+                condition.setElementsIds(Arrays.asList(ParamUtil.getParamArrayItems(params[2])));
 
                 abstractCondition = condition;
             }

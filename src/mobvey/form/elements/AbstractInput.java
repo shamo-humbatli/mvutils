@@ -22,7 +22,7 @@ import mobvey.operation.AbstractOperation;
 public abstract class AbstractInput extends AbstractFormElement {
 
     protected String columnDefinition = "0";
-    protected ColumnDefinitionType columnDefinitionType = ColumnDefinitionType.CI;
+    protected ColumnDefinitionType columnDefinitionType = ColumnDefinitionType.NS;
     protected String contentItemIndex;
     protected InputValueType inputValueType;
     protected final InputType inputType;
@@ -95,7 +95,16 @@ public abstract class AbstractInput extends AbstractFormElement {
         }
 
         if (Strings.isNullOrEmpty(_format)) {
-            return returnContent.toString();
+
+            Object corrRv = returnContent;
+
+            if (getInputValueType() == InputValueType.INT) {
+                if (returnContent instanceof Number) {
+                    corrRv = ((Number) returnContent).intValue();
+                }
+            }
+
+            return corrRv.toString().trim();
         }
 
         String formattedRc;
@@ -118,7 +127,7 @@ public abstract class AbstractInput extends AbstractFormElement {
             }
         } catch (Exception exp) {
             //exp ignored
-            formattedRc = returnContent.toString();
+            formattedRc = returnContent.toString().trim();
         }
 
         return formattedRc;

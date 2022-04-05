@@ -18,6 +18,10 @@ public class ParamUtil {
         return String.format("[%s]", Strings.join(",", values));
     }
 
+    public static String getAsStringLine(String value) {
+        return String.format("'%s'", value);
+    }
+
     public static String[] stringSplitByDepth(String strValue,
             String splitBy, int depth,
             String depthIncreaseSymbols,
@@ -197,7 +201,7 @@ public class ParamUtil {
             paramArr = paramArr.substring(1, pl - 1);
         }
 
-        return splitByDepth(paramArr, ',', 0, "[{(", ")}]");
+        return splitByDepth(paramArr, ',', 0, "[{('", "')}]");
     }
 
     public static String[] getParam(String key, String[] paramsArr) {
@@ -247,7 +251,7 @@ public class ParamUtil {
             objectStr = objectStr.substring(1, vl - 1);
         }
 
-        return splitByDepth(objectStr, ';', 0, "[{(", ")}]");
+        return splitByDepth(objectStr, ';', 0, "[{('", "')}]");
     }
 
     public static String getLinePropertyValue(String lineString, String propertyName) {
@@ -271,5 +275,18 @@ public class ParamUtil {
 
         }
         return null;
+    }
+
+    public static String getStringValue(String stringLine) {
+        if (Strings.isNullOrEmpty(stringLine)) {
+            return stringLine;
+        }
+
+        if (stringLine.indexOf('\'') == 0
+                && stringLine.lastIndexOf('\'') == stringLine.length() - 1) {
+            stringLine = stringLine.substring(1, stringLine.length() - 1);
+        }
+
+        return stringLine;
     }
 }

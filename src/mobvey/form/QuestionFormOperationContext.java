@@ -7,6 +7,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 import mobvey.common.NumberUtil;
 import mobvey.common.Strings;
 import mobvey.condition.AbstractCondition;
@@ -14,6 +15,12 @@ import mobvey.condition.CheckCheckedCondition;
 import mobvey.condition.CheckElementsAreCheckedCondition;
 import mobvey.condition.CheckElementsAreEnabledCondition;
 import mobvey.condition.CheckEnabledCondition;
+import mobvey.condition.CheckLengthCondition;
+import mobvey.condition.CheckLengthOfElementsCondition;
+import mobvey.condition.CheckLengthRangeCondition;
+import mobvey.condition.CheckLengthRangeOfElementsCondition;
+import mobvey.condition.CheckRegexCondition;
+import mobvey.condition.CheckRegexOnElementsCondition;
 import mobvey.condition.CompareInputValueWithDirectValueCondition;
 import mobvey.condition.CompareInputValueWithInputValueCondition;
 import mobvey.condition.CompareWithDirectValueCondition;
@@ -383,6 +390,18 @@ public class QuestionFormOperationContext implements IQuestionFormOperation {
 
         if (ai == null) {
             return changes;
+        }
+
+        Object currRv = ai.getReturnContent();
+
+        if (value == null) {
+            if (currRv == null) {
+                return changes;
+            }
+        } else {
+            if (currRv != null && currRv.equals(value)) {
+                return changes;
+            }
         }
 
         ai.setReturnContent(value);
@@ -977,6 +996,17 @@ public class QuestionFormOperationContext implements IQuestionFormOperation {
         }
 
         return abi.getReturnContent();
+    }
+
+    @Override
+    public String getInputFormmatedReturnValue(String inputId) {
+        AbstractInput abi = getElement(inputId, AbstractInput.class);
+
+        if (abi == null) {
+            return null;
+        }
+
+        return abi.getFormattedReturnContent();
     }
 
     @Override
@@ -1749,7 +1779,8 @@ public class QuestionFormOperationContext implements IQuestionFormOperation {
         return false;
     }
 
-    private boolean isConditionSatisfiedWithValue(AbstractCondition abstractCondition, AbstractFormElement conditionRefElm) {
+    private boolean isConditionSatisfiedWithValue(AbstractCondition abstractCondition,
+            AbstractFormElement conditionRefElm) {
 
         if (abstractCondition == null) {
             return true;
@@ -1785,6 +1816,7 @@ public class QuestionFormOperationContext implements IQuestionFormOperation {
                     if (value == null || Strings.isNullOrEmpty(value.toString())) {
                         return true;
                     }
+
                     Double doubleValue = Double.valueOf(value.toString());
 
                     IsInRangeOfDirectValuesCondition condition = (IsInRangeOfDirectValuesCondition) abstractCondition;
@@ -1918,6 +1950,112 @@ public class QuestionFormOperationContext implements IQuestionFormOperation {
 
                     return true;
                 }
+                case CHECK_REGEX: {
+                    String frv = getInputFormattedReturnValue(conditionRefElm);
+
+                    if (Strings.isNullOrEmpty(frv)) {
+                        return true;
+                    }
+
+                    CheckRegexCondition condition = (CheckRegexCondition) abstractCondition;
+
+                    Pattern regexPattern = Pattern.compile(condition.getPattern());
+
+                    return condition.getValidity() == regexPattern.matcher(frv).matches();
+                }
+                case CHECK_REGEX_ELMS: {
+                    CheckRegexOnElementsCondition condition = (CheckRegexOnElementsCondition) abstractCondition;
+                    Pattern regexPattern = Pattern.compile(condition.getPattern());
+
+                    Collection<String> frvs = new ArrayList<>();
+
+                    for (String inputId : condition.getElementsIds()) {
+                        String frv = getInputFormmatedReturnValue(inputId);
+
+                        if (Strings.isNullOrEmpty(frv)) {
+                            continue;
+                        }
+
+                        frvs.add(frv);
+                    }
+
+                    for (String rv : frvs) {
+                        if (condition.getValidity() != regexPattern.matcher(rv).matches()) {
+                            return false;
+                        }
+                    }
+
+                    return true;
+                }
+                case CHECK_LENGTH: {
+                    String frv = getInputFormattedReturnValue(conditionRefElm);
+
+                    if (frv == null) {
+                        return true;
+                    }
+
+                    CheckLengthCondition condition = (CheckLengthCondition) abstractCondition;
+
+                    return condition.getLength() == frv.length();
+                }
+                case CHECK_LENGTH_ELMS: {
+                    CheckLengthOfElementsCondition condition = (CheckLengthOfElementsCondition) abstractCondition;
+
+                    Collection<String> frvs = new ArrayList<>();
+
+                    for (String inputId : condition.getElementsIds()) {
+                        String frv = getInputFormmatedReturnValue(inputId);
+
+                        if (Strings.isNullOrEmpty(frv)) {
+                            continue;
+                        }
+
+                        frvs.add(frv);
+                    }
+
+                    for (String rv : frvs) {
+                        if (condition.getLength() != rv.length()) {
+                            return false;
+                        }
+                    }
+
+                    return true;
+                }
+                case CHECK_LENGTH_RANGE: {
+                    String frv = getInputFormattedReturnValue(conditionRefElm);
+
+                    if (frv == null) {
+                        return true;
+                    }
+
+                    CheckLengthRangeCondition condition = (CheckLengthRangeCondition) abstractCondition;
+
+                    return condition.getMinLength() <= frv.length() && frv.length() <= condition.getMaxLength();
+                }
+                case CHECK_LENGTH_RANGE_ELMS: {
+                    CheckLengthRangeOfElementsCondition condition = (CheckLengthRangeOfElementsCondition) abstractCondition;
+
+                    Collection<String> frvs = new ArrayList<>();
+
+                    for (String inputId : condition.getElementsIds()) {
+                        String frv = getInputFormmatedReturnValue(inputId);
+
+                        if (Strings.isNullOrEmpty(frv)) {
+                            continue;
+                        }
+
+                        frvs.add(frv);
+                    }
+
+                    for (String rv : frvs) {
+                        boolean cr = condition.getMinLength() <= rv.length() && rv.length() <= condition.getMaxLength();
+                        if (!cr) {
+                            return false;
+                        }
+                    }
+
+                    return true;
+                }
                 default:
                     return false;
             }
@@ -1933,6 +2071,14 @@ public class QuestionFormOperationContext implements IQuestionFormOperation {
     private Object getInputReturnValue(AbstractFormElement abstractFormElement) {
         if (abstractFormElement instanceof AbstractInput) {
             return ((AbstractInput) abstractFormElement).getReturnContent();
+        }
+
+        return null;
+    }
+
+    private String getInputFormattedReturnValue(AbstractFormElement abstractFormElement) {
+        if (abstractFormElement instanceof AbstractInput) {
+            return ((AbstractInput) abstractFormElement).getFormattedReturnContent();
         }
 
         return null;

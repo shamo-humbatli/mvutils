@@ -17,7 +17,7 @@ public class InputResult implements Serializable {
     private String returnValue;
 
     public String getColumnDescription() {
-        return columnDefinition + ":" + columnDefinition;
+        return columnDefinitionType + ":" + columnDefinition;
     }
 
     public boolean hasColumnDefinition() {

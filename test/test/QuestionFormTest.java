@@ -265,6 +265,13 @@ public class QuestionFormTest {
 
         printStr("-----------------------------------");
 
+        FormResultBuilder frb = new FormResultBuilder();
+        String xmlResult = frb.GetFormResultXmlString(ft);
+        printStr("form result xml:");
+        printStr(xmlResult);
+
+        printStr("-----------------------------------");
+
         qfoc.setReturnValue("anket_i1", 1);
         qfoc.setReturnValue("resp_i1", 2);
 
@@ -318,6 +325,15 @@ public class QuestionFormTest {
 
         Collection<ContentContainer> reqCcs = qfoc.getRequiredContainers();
         printStr("Req cont size: " + reqCcs.size());
+
+        printStr("-----------------------------------");
+
+        AbstractInput resp_emailInput = qfoc.getInputTextById("resp_email_i1");
+        InputValidationResult reIvr = qfoc.validateInput("resp_email_i1");
+        printStr("EMAILC_IVR 1: " + reIvr.toString());
+        qfoc.setReturnValue("resp_email_i1", "s@g.com");
+        reIvr = qfoc.validateInput("resp_email_i1");
+        printStr("EMAILC_IVR 2: " + reIvr.toString());
         printStr("-----------------------------------");
     }
 
