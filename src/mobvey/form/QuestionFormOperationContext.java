@@ -404,7 +404,10 @@ public class QuestionFormOperationContext implements IQuestionFormOperation {
             }
         }
 
-        ai.setReturnContent(value);
+        if(!ai.setReturnContent(value))
+        {
+            return changes;
+        }
 
         changes.add(ai.getId());
         changes.addAll(runElementEvents(ai));

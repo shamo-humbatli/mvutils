@@ -81,6 +81,11 @@ public class QuestionFormTest {
         printStr("onlyInputTextCount: " + onlyInputTextCount);
         printStr("onlyInputOptionCount: " + onlyInputOptionCount);
         printStr("containerCount: " + containerCount);
+        
+//        for(AbstractFormElement afe : qfoc.getFormElements().values())
+//        {
+//            afe.setEnabled(true);
+//        }
 
 //        printStr("-----------------------------------");
 //        printStr("FORM EVENTS");

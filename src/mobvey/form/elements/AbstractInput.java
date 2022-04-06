@@ -4,11 +4,12 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
+import mobvey.common.DateUtil;
 import mobvey.common.KeyValuePair;
 import mobvey.common.Strings;
 import mobvey.condition.AbstractCondition;
-import mobvey.form.elements.ContentContainer;
 import mobvey.form.enums.ColumnDefinitionType;
 import mobvey.form.enums.FormElementType;
 import mobvey.form.enums.InputType;
@@ -24,7 +25,7 @@ public abstract class AbstractInput extends AbstractFormElement {
     protected String columnDefinition = "0";
     protected ColumnDefinitionType columnDefinitionType = ColumnDefinitionType.NS;
     protected String contentItemIndex;
-    protected InputValueType inputValueType;
+    protected InputValueType inputValueType = InputValueType.TEXT;
     protected final InputType inputType;
     protected Object displayContent;
     protected boolean complex = false;
@@ -34,7 +35,7 @@ public abstract class AbstractInput extends AbstractFormElement {
 
     protected List<ContentContainer> contentContainers;
 
-    protected Object returnContent = null;
+    protected Object _returnContent = null;
 
     protected Collection<AbstractCondition> _validations;
 
@@ -82,7 +83,7 @@ public abstract class AbstractInput extends AbstractFormElement {
     }
 
     public Object getReturnContent() {
-        return returnContent;
+        return _returnContent;
     }
 
     public String getStringReturnContent() {
@@ -90,17 +91,17 @@ public abstract class AbstractInput extends AbstractFormElement {
     }
 
     public String getFormattedReturnContent() {
-        if (returnContent == null) {
+        if (_returnContent == null) {
             return null;
         }
 
         if (Strings.isNullOrEmpty(_format)) {
 
-            Object corrRv = returnContent;
+            Object corrRv = _returnContent;
 
             if (getInputValueType() == InputValueType.INT) {
-                if (returnContent instanceof Number) {
-                    corrRv = ((Number) returnContent).intValue();
+                if (_returnContent instanceof Number) {
+                    corrRv = ((Number) _returnContent).intValue();
                 }
             }
 
@@ -114,27 +115,92 @@ public abstract class AbstractInput extends AbstractFormElement {
                 case TEXT:
                 case INT:
                 case DOUBLE:
-                    formattedRc = String.format(_format, returnContent);
+                    formattedRc = String.format(_format, _returnContent);
                     break;
                 case DATE_TIME:
                 case DATE:
                 case TIME:
                     SimpleDateFormat sdf = new SimpleDateFormat(_format);
-                    formattedRc = sdf.format(returnContent);
+                    formattedRc = sdf.format(_returnContent);
                     break;
                 default:
-                    formattedRc = String.format(_format, returnContent);
+                    formattedRc = String.format(_format, _returnContent);
             }
         } catch (Exception exp) {
             //exp ignored
-            formattedRc = returnContent.toString().trim();
+            formattedRc = _returnContent.toString().trim();
         }
 
         return formattedRc;
     }
 
-    public void setReturnContent(Object returnContent) {
-        this.returnContent = returnContent;
+    public boolean setReturnContent(Object returnContent) {
+
+        if (returnContent == null) {
+            this._returnContent = null;
+            return true;
+        }
+
+        try {
+            switch (getInputValueType()) {
+                case TEXT:
+                    _returnContent = returnContent;
+                    break;
+                case INT:
+                    if (returnContent instanceof Integer) {
+                        _returnContent = returnContent;
+                        return true;
+                    } else if (returnContent instanceof Number) {
+                        _returnContent = ((Number) returnContent).intValue();
+                        return true;
+                    } else {
+                        _returnContent = Integer.parseInt(returnContent.toString());
+                        return true;
+                    }
+                case DOUBLE:
+                    if (returnContent instanceof Double) {
+                        _returnContent = returnContent;
+                        return true;
+                    } else if (returnContent instanceof Number) {
+                        _returnContent = ((Number) returnContent).doubleValue();
+                        return true;
+                    } else {
+                        _returnContent = Double.parseDouble(returnContent.toString());
+                        return true;
+                    }
+                case DATE_TIME:
+                case DATE:
+                case TIME:
+                    if (returnContent instanceof Date) {
+                        _returnContent = returnContent;
+                        return true;
+                    } else if (returnContent instanceof Number) {
+                        _returnContent = new Date(((Number) returnContent).longValue());
+                        return true;
+                    } else if (returnContent instanceof String) {
+
+                        if (Strings.hasContent(_format)) {
+                            _returnContent = DateUtil.parse((String) returnContent, _format);
+                        } else {
+                            _returnContent = DateUtil.parseDefault((String) returnContent);
+                        }
+
+                        return true;
+                    }
+                    else
+                    {
+                        return false;
+                    }
+                default:
+                    return false;
+
+            }
+        } catch (Exception exp) {
+            //ignored
+            return false;
+        }
+        
+        return false;
     }
 
     public List<ContentContainer> getContentContainers() {
@@ -253,7 +319,7 @@ public abstract class AbstractInput extends AbstractFormElement {
     public String getHrDisplayText() {
         switch (inputType) {
             case TEXT:
-                return returnContent == null ? "" : getFormattedReturnContent();
+                return _returnContent == null ? "" : getFormattedReturnContent();
             case OPTION:
                 return getFormattedReturnContent();
             default:
@@ -273,6 +339,6 @@ public abstract class AbstractInput extends AbstractFormElement {
 
     @Override
     public String toString() {
-        return "AbstractInput{" + "id=" + _id + ", columnDefinition=" + columnDefinition + ", columnDefinitionType=" + columnDefinitionType + ", contentItemIndex=" + contentItemIndex + ", inputValueType=" + inputValueType + ", inputType=" + inputType + ", displayContent=" + displayContent + ", parentId=" + getParentId() + ", complex=" + complex + ", containersRequired=" + containersRequired + ", returnContent=" + returnContent + '}';
+        return "AbstractInput{" + "id=" + _id + ", columnDefinition=" + columnDefinition + ", columnDefinitionType=" + columnDefinitionType + ", contentItemIndex=" + contentItemIndex + ", inputValueType=" + inputValueType + ", inputType=" + inputType + ", displayContent=" + displayContent + ", parentId=" + getParentId() + ", complex=" + complex + ", containersRequired=" + containersRequired + ", returnContent=" + _returnContent + '}';
     }
 }

@@ -90,7 +90,8 @@ public class OtherTests {
         printLine();
         itx = new InputTextContent();
         itx.setInputValueType(InputValueType.INT);
-        itx.setReturnContent(45.99);
+        itx.setFormat("%02d");
+        itx.setReturnContent(45.99767678678);
         
         printStr("ITX RV: " + itx.getFormattedReturnContent());
         printLine();

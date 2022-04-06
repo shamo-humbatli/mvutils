@@ -44,7 +44,7 @@ public class InputOptionContent extends AbstractInput {
         ioc.setFormat(_format);
         ioc.setInputValueType(inputValueType);
         ioc.setParentId(getParentId());
-        ioc.setReturnContent(returnContent);
+        ioc.setReturnContent(_returnContent);
         ioc.setDisplayContent(displayContent);
         ioc.setValueOperation(_valueOperation);
 

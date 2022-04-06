@@ -46,7 +46,7 @@ public class InputTextContent extends AbstractInput {
         itc.setEnabled(_enabled);
         itc.setInputValueType(inputValueType);
         itc.setParentId(getParentId());
-        itc.setReturnContent(returnContent);
+        itc.setReturnContent(_returnContent);
         itc.setDisplayContent(displayContent);
         itc.setReadonly(readonly);
         itc.setFormat(_format);

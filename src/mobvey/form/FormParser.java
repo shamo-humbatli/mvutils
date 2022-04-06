@@ -799,10 +799,10 @@ public class FormParser {
             }
 
             applyCommonAttributes(inputElement, abstractInput);
-
+            
+            abstractInput.setInputValueType(inputValueType);
             abstractInput.setReturnContent(returnContent);
             abstractInput.setContentItemIndex(itemIndex);
-            abstractInput.setInputValueType(inputValueType);
             abstractInput.setFormat(inputFormat);
             abstractInput.setColumnDefinition(columnDef);
             abstractInput.addValidations(buildConditions(validationsStr));
