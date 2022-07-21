@@ -145,7 +145,7 @@ public abstract class AbstractInput extends AbstractFormElement {
             switch (getInputValueType()) {
                 case TEXT:
                     _returnContent = returnContent;
-                    break;
+                    return true;
                 case INT:
                     if (returnContent instanceof Integer) {
                         _returnContent = returnContent;
@@ -199,8 +199,6 @@ public abstract class AbstractInput extends AbstractFormElement {
             //ignored
             return false;
         }
-        
-        return false;
     }
 
     public List<ContentContainer> getContentContainers() {
